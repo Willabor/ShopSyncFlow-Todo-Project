@@ -2,7 +2,8 @@ import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { storage } from "./storage";
-import { insertTaskSchema, insertProductSchema, User } from "@shared/schema";
+import { insertTaskSchema, insertProductSchema, insertShopifyStoreSchema, User } from "@shared/schema";
+import { shopifyService } from "./shopify";
 import { z } from "zod";
 
 // Type for authenticated requests
@@ -178,6 +179,17 @@ export function registerRoutes(app: Express): Server {
 
       const updatedTask = await storage.updateTaskStatus(req.params.id, status, req.user.id);
       
+      // Trigger Shopify publishing when task reaches PUBLISHED status
+      if (status === "PUBLISHED" && task.product) {
+        console.log(`Task ${task.id} reached PUBLISHED status, publishing to Shopify...`);
+        const publishResult = await shopifyService.publishProduct(task.product);
+        if (publishResult) {
+          console.log(`Successfully published product to Shopify: ${publishResult.shopifyProductId}`);
+        } else {
+          console.error(`Failed to publish product to Shopify for task ${task.id}`);
+        }
+      }
+      
       // Create notification for relevant users
       await createStatusChangeNotification(task, status, req.user.id);
       
@@ -243,6 +255,128 @@ export function registerRoutes(app: Express): Server {
       res.json({ success: true });
     } catch (error) {
       console.error("Error marking notification as read:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Shopify API routes
+
+  // Get Shopify stores (SuperAdmin only) - redact access tokens
+  app.get("/api/shopify/stores", requireAuth, requireRole(["SuperAdmin"]), async (req: AuthenticatedRequest, res) => {
+    try {
+      const stores = await storage.getShopifyStores();
+      const safeStores = stores.map(store => ({
+        ...store,
+        accessToken: "[REDACTED]"
+      }));
+      res.json(safeStores);
+    } catch (error) {
+      console.error("Error fetching Shopify stores:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Create Shopify store (SuperAdmin only) - redact access token
+  app.post("/api/shopify/stores", requireAuth, requireRole(["SuperAdmin"]), async (req: AuthenticatedRequest, res) => {
+    try {
+      const storeData = insertShopifyStoreSchema.parse(req.body);
+      const store = await storage.createShopifyStore(storeData);
+      const safeStore = { ...store, accessToken: "[REDACTED]" };
+      res.status(201).json(safeStore);
+    } catch (error) {
+      console.error("Error creating Shopify store:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Update Shopify store (SuperAdmin only) - redact access token  
+  app.patch("/api/shopify/stores/:id", requireAuth, requireRole(["SuperAdmin"]), async (req: AuthenticatedRequest, res) => {
+    try {
+      const updates = z.object({
+        name: z.string().optional(),
+        isActive: z.boolean().optional(),
+        webhookSecret: z.string().optional(),
+      }).parse(req.body);
+      
+      const updatedStore = await storage.updateShopifyStore(req.params.id, updates);
+      if (!updatedStore) {
+        return res.status(404).json({ message: "Shopify store not found" });
+      }
+      
+      const safeStore = { ...updatedStore, accessToken: "[REDACTED]" };
+      res.json(safeStore);
+    } catch (error) {
+      console.error("Error updating Shopify store:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Get product Shopify mapping
+  app.get("/api/products/:id/shopify", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const mapping = await storage.getShopifyProductMapping(req.params.id);
+      if (!mapping) {
+        return res.status(404).json({ message: "Product not published to Shopify" });
+      }
+      res.json(mapping);
+    } catch (error) {
+      console.error("Error fetching product Shopify mapping:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Manual task publishing to Shopify (task-centric)
+  app.post("/api/tasks/:id/publish", requireAuth, requireRole(["SuperAdmin", "WarehouseManager"]), async (req: AuthenticatedRequest, res) => {
+    try {
+      const task = await storage.getTask(req.params.id);
+      if (!task) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+
+      const result = await shopifyService.publishProduct(task.product);
+      if (!result) {
+        return res.status(400).json({ message: "Failed to publish product to Shopify" });
+      }
+
+      res.json({ 
+        message: "Product published successfully",
+        shopifyProductId: result.shopifyProductId,
+        handle: result.handle 
+      });
+    } catch (error) {
+      console.error("Error publishing product:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Shopify webhook handler with HMAC verification
+  app.post("/api/shopify/webhooks", async (req, res) => {
+    try {
+      const topic = req.headers["x-shopify-topic"] as string;
+      const shop = req.headers["x-shopify-shop-domain"] as string;
+      const signature = req.headers["x-shopify-hmac-sha256"] as string;
+      
+      if (!topic || !shop) {
+        return res.status(400).json({ message: "Missing required headers" });
+      }
+
+      // Get the store to validate webhook secret
+      const store = await storage.getActiveShopifyStore();
+      if (!store || !store.webhookSecret) {
+        return res.status(401).json({ message: "Webhook secret not configured" });
+      }
+
+      // Verify webhook signature (would need raw body)
+      // Note: This requires raw body parsing middleware
+      const rawBody = JSON.stringify(req.body);
+      if (!shopifyService.verifyWebhookSignature(rawBody, signature, store.webhookSecret)) {
+        return res.status(401).json({ message: "Invalid webhook signature" });
+      }
+
+      await shopifyService.handleWebhook(topic, shop, req.body);
+      res.status(200).json({ message: "Webhook processed" });
+    } catch (error) {
+      console.error("Error processing Shopify webhook:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   });

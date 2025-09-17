@@ -4,6 +4,8 @@ import {
   tasks, 
   auditLog, 
   notifications,
+  shopifyStores,
+  shopifyProductMappings,
   type User, 
   type InsertUser,
   type Product,
@@ -15,6 +17,10 @@ import {
   type InsertAuditLog,
   type Notification,
   type InsertNotification,
+  type ShopifyStore,
+  type InsertShopifyStore,
+  type ShopifyProductMapping,
+  type InsertShopifyProductMapping,
   type DashboardStats
 } from "@shared/schema";
 import { db } from "./db";
@@ -56,6 +62,16 @@ export interface IStorage {
   createNotification(notification: InsertNotification): Promise<Notification>;
   getUserNotifications(userId: string, limit?: number): Promise<Notification[]>;
   markNotificationRead(id: string): Promise<void>;
+  
+  // Shopify methods
+  createShopifyStore(store: InsertShopifyStore): Promise<ShopifyStore>;
+  getShopifyStores(): Promise<ShopifyStore[]>;
+  getActiveShopifyStore(): Promise<ShopifyStore | undefined>;
+  updateShopifyStore(id: string, updates: Partial<ShopifyStore>): Promise<ShopifyStore | undefined>;
+  createShopifyProductMapping(mapping: InsertShopifyProductMapping): Promise<ShopifyProductMapping>;
+  getShopifyProductMapping(productId: string): Promise<ShopifyProductMapping | undefined>;
+  getShopifyMappingByShopifyId(shopifyProductId: string): Promise<ShopifyProductMapping | undefined>;
+  updateShopifyProductMapping(id: string, updates: Partial<ShopifyProductMapping>): Promise<ShopifyProductMapping | undefined>;
   
   // Session store
   sessionStore: any;
@@ -344,6 +360,75 @@ export class DatabaseStorage implements IStorage {
       .update(notifications)
       .set({ read: true })
       .where(eq(notifications.id, id));
+  }
+
+  // Shopify methods implementation
+  async createShopifyStore(store: InsertShopifyStore): Promise<ShopifyStore> {
+    const [shopifyStore] = await db
+      .insert(shopifyStores)
+      .values(store)
+      .returning();
+    return shopifyStore;
+  }
+
+  async getShopifyStores(): Promise<ShopifyStore[]> {
+    return await db
+      .select()
+      .from(shopifyStores)
+      .orderBy(desc(shopifyStores.createdAt));
+  }
+
+  async getActiveShopifyStore(): Promise<ShopifyStore | undefined> {
+    const [store] = await db
+      .select()
+      .from(shopifyStores)
+      .where(eq(shopifyStores.isActive, true))
+      .limit(1);
+    return store;
+  }
+
+  async updateShopifyStore(id: string, updates: Partial<ShopifyStore>): Promise<ShopifyStore | undefined> {
+    const [updated] = await db
+      .update(shopifyStores)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(shopifyStores.id, id))
+      .returning();
+    return updated;
+  }
+
+  async createShopifyProductMapping(mapping: InsertShopifyProductMapping): Promise<ShopifyProductMapping> {
+    const [productMapping] = await db
+      .insert(shopifyProductMappings)
+      .values(mapping)
+      .returning();
+    return productMapping;
+  }
+
+  async getShopifyProductMapping(productId: string): Promise<ShopifyProductMapping | undefined> {
+    const [mapping] = await db
+      .select()
+      .from(shopifyProductMappings)
+      .where(eq(shopifyProductMappings.productId, productId))
+      .limit(1);
+    return mapping;
+  }
+
+  async getShopifyMappingByShopifyId(shopifyProductId: string): Promise<ShopifyProductMapping | undefined> {
+    const [mapping] = await db
+      .select()
+      .from(shopifyProductMappings)
+      .where(eq(shopifyProductMappings.shopifyProductId, shopifyProductId))
+      .limit(1);
+    return mapping;
+  }
+
+  async updateShopifyProductMapping(id: string, updates: Partial<ShopifyProductMapping>): Promise<ShopifyProductMapping | undefined> {
+    const [updated] = await db
+      .update(shopifyProductMappings)
+      .set(updates)
+      .where(eq(shopifyProductMappings.id, id))
+      .returning();
+    return updated;
   }
 }
 

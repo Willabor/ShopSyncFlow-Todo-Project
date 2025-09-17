@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, integer, boolean, jsonb, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, integer, boolean, jsonb, json, pgEnum } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -93,6 +93,38 @@ export const notifications = pgTable("notifications", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Shopify stores configuration table
+export const shopifyStores = pgTable("shopify_stores", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  shopDomain: text("shop_domain").notNull().unique(),
+  accessToken: text("access_token").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  webhookSecret: text("webhook_secret"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Session table (used by connect-pg-simple)
+export const session = pgTable("session", {
+  sid: varchar("sid").primaryKey(),
+  sess: json("sess").notNull(),
+  expire: timestamp("expire").notNull(),
+});
+
+// Shopify product mappings table
+export const shopifyProductMappings = pgTable("shopify_product_mappings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  productId: varchar("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
+  shopifyStoreId: varchar("shopify_store_id").notNull().references(() => shopifyStores.id, { onDelete: "cascade" }),
+  shopifyProductId: text("shopify_product_id").notNull(),
+  shopifyHandle: text("shopify_handle"),
+  publishedAt: timestamp("published_at").defaultNow().notNull(),
+  status: text("status").notNull().default("published"), // published, draft, archived
+  lastSyncAt: timestamp("last_sync_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   assignedTasks: many(tasks, { relationName: "assignedTo" }),
@@ -145,6 +177,21 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
   }),
 }));
 
+export const shopifyStoresRelations = relations(shopifyStores, ({ many }) => ({
+  productMappings: many(shopifyProductMappings),
+}));
+
+export const shopifyProductMappingsRelations = relations(shopifyProductMappings, ({ one }) => ({
+  product: one(products, {
+    fields: [shopifyProductMappings.productId],
+    references: [products.id],
+  }),
+  shopifyStore: one(shopifyStores, {
+    fields: [shopifyProductMappings.shopifyStoreId],
+    references: [shopifyStores.id],
+  }),
+}));
+
 // Schemas for validation
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -174,6 +221,19 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
   createdAt: true,
 });
 
+export const insertShopifyStoreSchema = createInsertSchema(shopifyStores).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertShopifyProductMappingSchema = createInsertSchema(shopifyProductMappings).omit({
+  id: true,
+  publishedAt: true,
+  lastSyncAt: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -185,6 +245,10 @@ export type AuditLog = typeof auditLog.$inferSelect;
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type ShopifyStore = typeof shopifyStores.$inferSelect;
+export type InsertShopifyStore = z.infer<typeof insertShopifyStoreSchema>;
+export type ShopifyProductMapping = typeof shopifyProductMappings.$inferSelect;
+export type InsertShopifyProductMapping = z.infer<typeof insertShopifyProductMappingSchema>;
 
 // Task with relations
 export type TaskWithDetails = Task & {
