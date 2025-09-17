@@ -10,6 +10,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { TaskWithDetails, DashboardStats } from "@shared/schema";
 import { useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
 
 interface KanbanBoardProps {
   onTaskClick: (taskId: string) => void;
@@ -29,10 +30,44 @@ const STATUSES = [
 export function KanbanBoard({ onTaskClick }: KanbanBoardProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [filter, setFilter] = useState("all");
 
+  const getQueryParams = () => {
+    switch (filter) {
+      case "my":
+        return { assignedTo: user?.id };
+      case "high":
+        return { priority: "high" };
+      case "overdue":
+        // This would need backend support for overdue filtering
+        return {};
+      default:
+        return {};
+    }
+  };
+
+  const queryParams = getQueryParams();
   const { data: tasks = [], isLoading: tasksLoading } = useQuery<TaskWithDetails[]>({
-    queryKey: ["/api/tasks", filter !== "all" ? { filter } : undefined].filter(Boolean),
+    queryKey: ["/api/tasks", queryParams],
+    queryFn: async () => {
+      // Build URL with query parameters
+      const url = new URL('/api/tasks', window.location.origin);
+      if (queryParams && Object.keys(queryParams).length > 0) {
+        Object.entries(queryParams).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            url.searchParams.set(key, String(value));
+          }
+        });
+      }
+      const response = await fetch(url.toString(), {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error(`${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    },
   });
 
   const { data: stats } = useQuery<DashboardStats>({
@@ -42,22 +77,14 @@ export function KanbanBoard({ onTaskClick }: KanbanBoardProps) {
   const moveTaskMutation = useMutation({
     mutationFn: async ({ taskId, status }: { taskId: string, status: string }) => {
       const response = await apiRequest("PATCH", `/api/tasks/${taskId}/status`, { status });
-      return response.json();
-    },
-    onSuccess: () => {
+      const result = await response.json();
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
       toast({
         title: "Task Updated",
         description: "Task status has been updated successfully.",
       });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Update Failed",
-        description: error.message || "Failed to update task status.",
-        variant: "destructive",
-      });
+      return result;
     },
   });
 
@@ -65,8 +92,6 @@ export function KanbanBoard({ onTaskClick }: KanbanBoardProps) {
     mutationFn: async () => {
       await queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
-    },
-    onSuccess: () => {
       toast({
         title: "Refreshed",
         description: "Data has been refreshed successfully.",

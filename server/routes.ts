@@ -137,8 +137,15 @@ export function registerRoutes(app: Express): Server {
         return res.status(403).json({ message: "Cannot edit this task" });
       }
 
-      const updates = req.body;
-      delete updates.id; // Don't allow ID updates
+      // Create allowed updates schema - exclude critical fields that must go through proper endpoints
+      const allowedUpdatesSchema = z.object({
+        notes: z.string().optional(),
+        priority: z.enum(["high", "medium", "low"]).optional(),
+        slaDeadline: z.string().datetime().optional().transform(val => val ? new Date(val) : undefined),
+        checklist: z.record(z.any()).optional(),
+      }).strict();
+
+      const updates = allowedUpdatesSchema.parse(req.body);
       
       const updatedTask = await storage.updateTask(req.params.id, updates);
       res.json(updatedTask);
