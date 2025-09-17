@@ -50,6 +50,7 @@ export interface IStorage {
   // Audit methods
   createAuditEntry(entry: InsertAuditLog): Promise<AuditLog>;
   getTaskAuditLog(taskId: string): Promise<AuditLog[]>;
+  getAllAuditLogs(): Promise<AuditLog[]>;
   
   // Notification methods
   createNotification(notification: InsertNotification): Promise<Notification>;
@@ -311,6 +312,14 @@ export class DatabaseStorage implements IStorage {
       .from(auditLog)
       .where(eq(auditLog.taskId, taskId))
       .orderBy(desc(auditLog.timestamp));
+  }
+
+  async getAllAuditLogs(): Promise<AuditLog[]> {
+    return await db
+      .select()
+      .from(auditLog)
+      .orderBy(desc(auditLog.timestamp))
+      .limit(500); // Limit to recent 500 entries for performance
   }
 
   async createNotification(notification: InsertNotification): Promise<Notification> {

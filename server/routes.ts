@@ -181,6 +181,22 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Get system-wide audit logs (SuperAdmin and Auditor only)
+  app.get("/api/audit", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      // Only Super Admin and Auditor can view system-wide audit logs
+      if (!["SuperAdmin", "Auditor"].includes(req.user.role)) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const auditLogs = await storage.getAllAuditLogs();
+      res.json(auditLogs);
+    } catch (error) {
+      console.error("Error fetching system audit logs:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // Get task audit log
   app.get("/api/tasks/:id/audit", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
