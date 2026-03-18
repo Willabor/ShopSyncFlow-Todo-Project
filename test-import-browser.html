@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QuickBooks Import Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 20px; margin: 10px 0; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>🧪 QuickBooks Import Test - Color/Size Fix</h1>
+
+    <div class="section">
+        <h2>1. Select QuickBooks File</h2>
+        <input type="file" id="fileInput" accept=".xls,.xlsx" />
+        <div id="fileInfo"></div>
+    </div>
+
+    <div class="section">
+        <h2>2. Run Import</h2>
+        <button onclick="runImport()">Import Variants</button>
+        <div id="importResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>3. Verification Results</h2>
+        <div id="verificationResult"></div>
+    </div>
+
+    <script>
+        const PRODUCT_ID = '55e349ec-3ad4-4650-a1c6-5ed02c9c7e53';
+
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('fileInfo').innerHTML = `
+                    <p>✅ Selected: ${file.name} (${(file.size / 1024).toFixed(2)} KB)</p>
+                `;
+            }
+        });
+
+        async function runImport() {
+            const fileInput = document.getElementById('fileInput');
+            if (!fileInput.files[0]) {
+                alert('Please select a file first!');
+                return;
+            }
+
+            const resultDiv = document.getElementById('importResult');
+            const verificationDiv = document.getElementById('verificationResult');
+
+            resultDiv.innerHTML = '<p>⏳ Uploading and processing...</p>';
+
+            try {
+                // Step 1: Upload and import
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+
+                const importRes = await fetch(`/api/products/${PRODUCT_ID}/import-variants-from-qb`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const importData = await importRes.json();
+
+                resultDiv.innerHTML = `
+                    <h3>📊 Import Results:</h3>
+                    <pre>${JSON.stringify(importData, null, 2)}</pre>
+                `;
+
+                if (!importData.success) {
+                    resultDiv.innerHTML += `<p class="error">❌ Import failed: ${importData.error || importData.message}</p>`;
+                    return;
+                }
+
+                // Step 2: Verify options
+                const productRes = await fetch(`/api/products/${PRODUCT_ID}`);
+                const product = await productRes.json();
+
+                const variantsRes = await fetch(`/api/products/${PRODUCT_ID}/variants`);
+                const variants = await variantsRes.json();
+
+                // Step 3: Validation
+                const hasColor = product.options?.some(o => o.name === 'Color');
+                const hasSize = product.options?.some(o => o.name === 'Size');
+                const allHaveColor = variants.every(v => v.option1 === 'Ice Blue');
+                const allHaveSize = variants.every(v => v.option2 !== null);
+
+                let verificationHTML = '<h3>✅ Verification:</h3>';
+
+                // Display options
+                verificationHTML += '<h4>Product Options:</h4><ul>';
+                if (product.options && product.options.length > 0) {
+                    product.options.forEach(opt => {
+                        verificationHTML += `<li><strong>${opt.name}</strong> (position ${opt.position}): ${opt.values.join(', ')}</li>`;
+                    });
+                } else {
+                    verificationHTML += '<li class="error">No options found!</li>';
+                }
+                verificationHTML += '</ul>';
+
+                // Display sample variants
+                verificationHTML += `<h4>Variants (${variants.length} total):</h4><ul>`;
+                variants.slice(0, 3).forEach(v => {
+                    verificationHTML += `
+                        <li>
+                            <strong>${v.title}</strong> - SKU: ${v.sku}<br>
+                            option1: ${v.option1} | option2: ${v.option2} | Price: $${v.price}
+                        </li>
+                    `;
+                });
+                if (variants.length > 3) {
+                    verificationHTML += `<li><em>... and ${variants.length - 3} more variants</em></li>`;
+                }
+                verificationHTML += '</ul>';
+
+                // Validation checks
+                verificationHTML += '<h4>Validation Checks:</h4><ul>';
+                verificationHTML += `<li>Color option created: ${hasColor ? '<span class="success">✅ YES</span>' : '<span class="error">❌ NO</span>'}</li>`;
+                verificationHTML += `<li>Size option created: ${hasSize ? '<span class="success">✅ YES</span>' : '<span class="error">❌ NO</span>'}</li>`;
+                verificationHTML += `<li>All variants have option1 (Color): ${allHaveColor ? '<span class="success">✅ YES</span>' : '<span class="error">❌ NO</span>'}</li>`;
+                verificationHTML += `<li>All variants have option2 (Size): ${allHaveSize ? '<span class="success">✅ YES</span>' : '<span class="error">❌ NO</span>'}</li>`;
+                verificationHTML += '</ul>';
+
+                if (hasColor && hasSize && allHaveColor && allHaveSize) {
+                    verificationHTML += '<h2 class="success">🎉 SUCCESS! Color/Size relationship properly created!</h2>';
+                } else {
+                    verificationHTML += '<h2 class="error">❌ VALIDATION FAILED - Structure not correct</h2>';
+                }
+
+                verificationDiv.innerHTML = verificationHTML;
+
+            } catch (error) {
+                resultDiv.innerHTML += `<p class="error">❌ Error: ${error.message}</p>`;
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

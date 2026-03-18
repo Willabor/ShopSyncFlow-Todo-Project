@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧨 Nuclear Reset - Complete Clean Slate</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .warning {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 18px;
+        }
+        .nuclear-button {
+            background: linear-gradient(45deg, #ff4757, #ff3742);
+            color: white;
+            border: none;
+            padding: 30px 60px;
+            font-size: 28px;
+            border-radius: 15px;
+            cursor: pointer;
+            margin: 30px;
+            box-shadow: 0 10px 20px rgba(255, 71, 87, 0.4);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        .nuclear-button:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(255, 71, 87, 0.6);
+            background: linear-gradient(45deg, #ff3742, #ff2742);
+        }
+        .nuclear-button:active {
+            transform: translateY(-2px) scale(1.02);
+        }
+        .status {
+            margin: 30px 0;
+            padding: 20px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        .success { background: rgba(46, 204, 113, 0.3); }
+        .error { background: rgba(231, 76, 60, 0.3); }
+        .info { background: rgba(52, 152, 219, 0.3); }
+        .steps {
+            text-align: left;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        .countdown {
+            font-size: 72px;
+            font-weight: bold;
+            color: #ff4757;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
+            margin: 20px 0;
+        }
+        .explosion {
+            font-size: 100px;
+            animation: explode 0.5s ease-out;
+        }
+        @keyframes explode {
+            0% { transform: scale(0.1); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧨 NUCLEAR RESET</h1>
+        <p style="font-size: 24px; margin-bottom: 30px;">
+            Complete destruction of all cached data and fresh restart
+        </p>
+
+        <div class="warning">
+            ⚠️ <strong>WARNING:</strong> This will completely destroy:<br>
+            • All browser cache and storage<br>
+            • All cookies and sessions<br>
+            • React Query cache<br>
+            • Local storage data<br>
+            <br>
+            <strong>You will need to login again and create fresh test data.</strong>
+        </div>
+
+        <button class="nuclear-button" onclick="nuclearReset()">
+            💥 NUKE EVERYTHING 💥
+        </button>
+
+        <div id="status" class="status">
+            Ready to launch nuclear reset. Click the button when you're ready to start fresh.
+        </div>
+
+        <div class="steps">
+            <h3>🔥 What Nuclear Reset Does:</h3>
+            <ol style="font-size: 18px; line-height: 1.8;">
+                <li><strong>DESTROYS</strong> all localStorage data</li>
+                <li><strong>DESTROYS</strong> all sessionStorage data</li>
+                <li><strong>DESTROYS</strong> all cookies for this domain</li>
+                <li><strong>DESTROYS</strong> all React Query cache</li>
+                <li><strong>FORCES</strong> hard refresh bypassing all caches</li>
+                <li><strong>REDIRECTS</strong> to fresh test environment</li>
+                <li><strong>PREVENTS</strong> any cached data from surviving</li>
+            </ol>
+        </div>
+
+        <p style="font-size: 20px; margin-top: 30px; opacity: 0.9;">
+            After the nuclear reset, you'll be redirected to:<br>
+            <strong>Fresh Test Environment</strong>
+        </p>
+    </div>
+
+    <script>
+        function nuclearReset() {
+            const statusDiv = document.getElementById('status');
+            const button = document.querySelector('.nuclear-button');
+
+            // Disable button
+            button.disabled = true;
+            button.style.opacity = '0.5';
+
+            try {
+                statusDiv.innerHTML = '<div class="info">🚀 Initiating nuclear reset sequence...</div>';
+
+                // Step 1: Clear everything
+                localStorage.clear();
+                sessionStorage.clear();
+
+                // Clear all cookies aggressively
+                document.cookie.split(";").forEach(function(c) {
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/;domain=" + window.location.hostname);
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/;domain=." + window.location.hostname);
+                });
+
+                // Clear any remaining React Query cache
+                if (window.queryClient) {
+                    window.queryClient.clear();
+                }
+
+                // Clear any other potential caches
+                if ('caches' in window) {
+                    caches.keys().then(names => {
+                        names.forEach(name => {
+                            caches.delete(name);
+                        });
+                    });
+                }
+
+                statusDiv.innerHTML = `
+                    <div class="success">
+                        <div class="explosion">💥</div>
+                        <div>ALL DATA DESTROYED!</div>
+                        <div>Launching in...</div>
+                    </div>
+                `;
+
+                // Nuclear countdown
+                let countdown = 5;
+                const countdownInterval = setInterval(() => {
+                    statusDiv.innerHTML = `
+                        <div class="success">
+                            <div class="explosion">💥</div>
+                            <div>ALL DATA DESTROYED!</div>
+                            <div>Launching in...</div>
+                            <div class="countdown">${countdown}</div>
+                        </div>
+                    `;
+                    countdown--;
+
+                    if (countdown < 0) {
+                        clearInterval(countdownInterval);
+
+                        // Force the most aggressive reload possible
+                        const timestamp = Date.now();
+                        const randomId = Math.random().toString(36).substr(2, 9);
+
+                        // Clear any service workers
+                        if ('serviceWorker' in navigator) {
+                            navigator.serviceWorker.getRegistrations().then(registrations => {
+                                registrations.forEach(registration => {
+                                    registration.unregister();
+                                });
+                            });
+                        }
+
+                        // Multiple redirect attempts to ensure it works
+                        window.location.href = `http://localhost:5001/clear-and-test.html?nuclear=${timestamp}&id=${randomId}`;
+
+                        // Backup redirect
+                        setTimeout(() => {
+                            window.location.replace(`http://localhost:5001/clear-and-test.html?nuclear=${timestamp}&id=${randomId}`);
+                        }, 100);
+
+                        // Last resort reload
+                        setTimeout(() => {
+                            window.location.reload(true);
+                        }, 500);
+                    }
+                }, 1000);
+
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="error">❌ Nuclear reset failed: ${error.message}</div>`;
+                button.disabled = false;
+                button.style.opacity = '1';
+            }
+        }
+
+        // Add some dramatic effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Random sparks
+            setInterval(() => {
+                if (Math.random() > 0.7) {
+                    const spark = document.createElement('div');
+                    spark.innerHTML = ['💥', '🔥', '⚡', '💀', '☢️'][Math.floor(Math.random() * 5)];
+                    spark.style.position = 'fixed';
+                    spark.style.left = Math.random() * window.innerWidth + 'px';
+                    spark.style.top = Math.random() * window.innerHeight + 'px';
+                    spark.style.fontSize = (Math.random() * 30 + 20) + 'px';
+                    spark.style.pointerEvents = 'none';
+                    spark.style.animation = 'explode 1s ease-out forwards';
+                    spark.style.zIndex = '9999';
+                    document.body.appendChild(spark);
+
+                    setTimeout(() => {
+                        if (spark.parentNode) {
+                            spark.parentNode.removeChild(spark);
+                        }
+                    }, 1000);
+                }
+            }, 200);
+        });
+    </script>
+</body>
+</html>

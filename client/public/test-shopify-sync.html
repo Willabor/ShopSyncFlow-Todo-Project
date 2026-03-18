@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 4 Shopify Handle Sync Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        .log {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        .success {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .error {
+            color: #f44336;
+            font-weight: bold;
+        }
+        .info {
+            color: #2196F3;
+        }
+        .input-group {
+            margin: 15px 0;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Phase 4: Shopify Handle Sync Test</h1>
+
+        <p><strong>Instructions:</strong></p>
+        <ol>
+            <li>Make sure you're logged into ShopSyncFlow</li>
+            <li>Click "Find Test Product" to get a published product</li>
+            <li>Click "Test Sync" to sync handle to Shopify</li>
+            <li>Check the log below for results</li>
+        </ol>
+
+        <div class="input-group">
+            <label for="productId">Product ID (auto-filled):</label>
+            <input type="text" id="productId" placeholder="Will be auto-filled when you click 'Find Test Product'" readonly>
+        </div>
+
+        <button id="findBtn" onclick="findProduct()">1. Find Test Product</button>
+        <button id="testBtn" onclick="testSync()" disabled>2. Test Sync to Shopify</button>
+        <button id="restoreBtn" onclick="restoreHandle()" disabled style="background: #ff9800;">3. Restore Original</button>
+
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        let productId = null;
+        let originalHandle = null;
+        let newHandle = null;
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+            logDiv.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        async function findProduct() {
+            log('🔍 Finding a product published to Shopify...');
+
+            try {
+                const response = await fetch('/api/products?limit=100', {
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.products || data.products.length === 0) {
+                    log('❌ No products found', 'error');
+                    return;
+                }
+
+                const publishedProduct = data.products.find(p => p.shopifyProductId);
+
+                if (!publishedProduct) {
+                    log('❌ No published products found. Please publish a product to Shopify first.', 'error');
+                    return;
+                }
+
+                productId = publishedProduct.id;
+                originalHandle = publishedProduct.handle;
+
+                document.getElementById('productId').value = productId;
+                document.getElementById('testBtn').disabled = false;
+
+                log(`✅ Found product: "${publishedProduct.title}"`, 'success');
+                log(`   Product ID: ${productId}`);
+                log(`   Current Handle: ${originalHandle}`);
+                log(`   Shopify Product ID: ${publishedProduct.shopifyProductId}`);
+                log('');
+                log('✅ Ready to test! Click "Test Sync to Shopify"', 'success');
+
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        async function testSync() {
+            if (!productId) {
+                log('❌ No product selected', 'error');
+                return;
+            }
+
+            log('');
+            log('🚀 STARTING SHOPIFY SYNC TEST...', 'info');
+            log('================================================');
+
+            try {
+                // Step 1: Update local handle
+                newHandle = `test-handle-phase4-${Date.now()}`;
+                log(`📝 Step 1: Updating local handle to: ${newHandle}`);
+
+                const updateResponse = await fetch(`/api/products/${productId}/handle`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ handle: newHandle })
+                });
+
+                if (!updateResponse.ok) {
+                    throw new Error(`Failed to update local handle: ${updateResponse.statusText}`);
+                }
+
+                const updateData = await updateResponse.json();
+                log(`✅ Local handle updated successfully`, 'success');
+
+                // Step 2: Sync to Shopify
+                log('');
+                log('🚀 Step 2: Syncing handle to Shopify...');
+                log('   This is the main test - updating product on Shopify');
+
+                const syncResponse = await fetch(`/api/products/${productId}/handle/sync-to-shopify`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+
+                if (!syncResponse.ok) {
+                    throw new Error(`Sync failed: HTTP ${syncResponse.status}`);
+                }
+
+                const syncData = await syncResponse.json();
+
+                log('');
+                log('📋 SYNC RESPONSE:');
+                log(JSON.stringify(syncData, null, 2));
+                log('');
+
+                if (syncData.success) {
+                    log('🎉🎉🎉 SUCCESS! Handle synced to Shopify! 🎉🎉🎉', 'success');
+                    log('');
+                    log(`✅ New Product URL:`, 'success');
+                    log(`   https://nexus-clothes.myshopify.com/products/${syncData.handle}`);
+                    log('');
+                    log(`✅ Verify in Shopify Admin:`, 'success');
+                    log(`   Go to Shopify admin and check the product URL`);
+                    log('');
+                    log('👉 You can now click "Restore Original" to reset', 'info');
+
+                    document.getElementById('restoreBtn').disabled = false;
+                } else {
+                    log('❌ Sync failed: ' + (syncData.error || 'Unknown error'), 'error');
+
+                    if (syncData.error && syncData.error.includes('write_products')) {
+                        log('', 'error');
+                        log('⚠️  PERMISSION ERROR:', 'error');
+                        log('   The write_products scope might not be properly configured', 'error');
+                        log('   Please verify in Shopify admin', 'error');
+                    }
+                }
+
+            } catch (error) {
+                log('', 'error');
+                log(`❌ TEST FAILED: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        async function restoreHandle() {
+            if (!productId || !originalHandle) {
+                log('❌ Missing product info', 'error');
+                return;
+            }
+
+            log('');
+            log('🧹 Restoring original handle...');
+
+            try {
+                // Restore local
+                const updateResponse = await fetch(`/api/products/${productId}/handle`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ handle: originalHandle })
+                });
+
+                if (!updateResponse.ok) {
+                    throw new Error('Failed to restore local handle');
+                }
+
+                log(`✅ Local handle restored to: ${originalHandle}`, 'success');
+
+                // Sync back to Shopify
+                const syncResponse = await fetch(`/api/products/${productId}/handle/sync-to-shopify`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+
+                if (!syncResponse.ok) {
+                    throw new Error('Failed to sync restored handle to Shopify');
+                }
+
+                log(`✅ Shopify handle restored`, 'success');
+                log('');
+                log('✅ Cleanup complete!', 'success');
+
+                document.getElementById('restoreBtn').disabled = true;
+                document.getElementById('testBtn').disabled = true;
+                document.getElementById('productId').value = '';
+                productId = null;
+
+            } catch (error) {
+                log(`❌ Error restoring: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

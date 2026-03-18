@@ -1,0 +1,10 @@
+node_modules/
+dist/
+playwright-report/
+.git/
+*.tar.gz
+*.dump
+*.png
+*.log
+backups/
+uploads/

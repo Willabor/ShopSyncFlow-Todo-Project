@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Debug Task Creation</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .debug-section {
+            background: rgba(99, 102, 241, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .requirement {
+            background: rgba(16, 185, 129, 0.2);
+            border-left: 4px solid #10b981;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .error-check {
+            background: rgba(239, 68, 68, 0.2);
+            border-left: 4px solid #ef4444;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .code {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 8px;
+            font-family: monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+        .button {
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        .button:hover {
+            background: #7c3aed;
+            transform: translateY(-2px);
+        }
+        .checklist {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Debug Task Creation Issues</h1>
+
+        <div class="debug-section">
+            <h2>🎯 Current Status:</h2>
+            <p>Added enhanced logging and validation. Ready to debug the 400 error!</p>
+        </div>
+
+        <div>
+            <h3>📋 Debug Checklist - Follow These Steps:</h3>
+
+            <div class="checklist">
+                <h4>1️⃣ Open Browser Developer Tools</h4>
+                <ul>
+                    <li>Press F12 or right-click → Inspect</li>
+                    <li>Go to Console tab</li>
+                    <li>Clear any existing logs</li>
+                </ul>
+            </div>
+
+            <div class="checklist">
+                <h4>2️⃣ Try Creating a Task</h4>
+                <ul>
+                    <li>Open application at <a href="http://localhost:5000" style="color: #a855f7;">localhost:5000</a></li>
+                    <li>Click "New Product" button</li>
+                    <li>Fill in the form with test data</li>
+                    <li>Submit the form</li>
+                </ul>
+            </div>
+
+            <div class="checklist">
+                <h4>3️⃣ Check Console Logs</h4>
+                <p>You should see these logs in order:</p>
+                <div class="requirement">
+                    <strong>Frontend logs:</strong>
+                    <div class="code">
+Submitting product data: { title: "...", vendor: "...", ... }
+Submitting task data: { orderNumber: "...", receivedDate: "...", ... }
+                    </div>
+                </div>
+                <div class="requirement">
+                    <strong>Backend logs (check terminal):</strong>
+                    <div class="code">
+Creating product with data: { product: {...}, task: {...} }
+Parsed productData: {...}
+Parsed taskData: {...}
+                    </div>
+                </div>
+            </div>
+
+            <div class="checklist">
+                <h4>4️⃣ If Still Getting 400 Error</h4>
+                <p>Look for validation error details:</p>
+                <div class="error-check">
+                    <strong>In browser console:</strong> Check Network tab for response details<br>
+                    <strong>In terminal:</strong> Look for "Validation errors:" with detailed field errors
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h3>🔍 What the Logs Will Tell Us:</h3>
+
+            <div class="requirement">
+                <strong>Frontend Data Validation:</strong><br>
+                • Are required fields (title, vendor) filled?<br>
+                • Is receivedDate formatted as ISO string?<br>
+                • Are empty strings being sent as empty strings or null?
+            </div>
+
+            <div class="requirement">
+                <strong>Backend Schema Validation:</strong><br>
+                • Which specific fields are failing validation?<br>
+                • Are the data types correct (string vs Date)?<br>
+                • Are required fields missing?
+            </div>
+
+            <div class="requirement">
+                <strong>Common Issues to Look For:</strong><br>
+                • Missing vendor selection<br>
+                • Empty product title<br>
+                • Invalid date format<br>
+                • Wrong data structure
+            </div>
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.05); border-radius: 10px; padding: 20px; margin-top: 20px;">
+            <h4>📝 Recent Improvements Made:</h4>
+            <ul>
+                <li>✅ Added frontend validation for required fields (title, vendor)</li>
+                <li>✅ Enhanced error handling with specific messages</li>
+                <li>✅ Added detailed logging on both frontend and backend</li>
+                <li>✅ Fixed date formatting to use ISO strings</li>
+                <li>✅ Added null checks and default values</li>
+                <li>✅ Improved dialog accessibility</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="button" onclick="window.open('http://localhost:5000', '_blank')">
+                🚀 Test With Debug Logging
+            </button>
+        </div>
+
+        <div style="background: rgba(239, 68, 68, 0.2); border-radius: 10px; padding: 20px; margin-top: 20px;">
+            <h4>🔧 If Problem Persists:</h4>
+            <p>Share the exact console logs (both browser and terminal) and I can identify the specific validation issue!</p>
+        </div>
+    </div>
+
+    <script>
+        // Auto-check server status
+        fetch('http://localhost:5000/api/user', { credentials: 'include' })
+            .then(response => {
+                if (response.status === 401) {
+                    console.log('✅ Server is running, but user not logged in');
+                } else if (response.ok) {
+                    console.log('✅ Server is running and user is logged in');
+                } else {
+                    console.log('⚠️ Server response:', response.status);
+                }
+            })
+            .catch(error => {
+                console.error('❌ Server connection failed:', error);
+            });
+    </script>
+</body>
+</html>

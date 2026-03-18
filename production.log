@@ -1,0 +1,7 @@
+✓ Gemini API initialized (key: AIzaSyBgi9...)
+✓ Google Ads API configured
+✓ Google Ads client initialized (MCC)
+  Manager Account: 1894608688
+  Sub-Account: 2980861126
+3:46:37 PM [express] serving on port 9000
+Email server is ready to send messages

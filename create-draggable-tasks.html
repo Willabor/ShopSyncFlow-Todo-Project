@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-name, initial-scale=1.0">
+    <title>🎯 Create Draggable Tasks</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        .status {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .success { background: rgba(46, 204, 113, 0.3); }
+        .error { background: rgba(231, 76, 60, 0.3); }
+        .info { background: rgba(52, 152, 219, 0.3); }
+        .create-button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            margin: 20px;
+            transition: all 0.3s ease;
+        }
+        .create-button:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        .task-preview {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Create Draggable Tasks</h1>
+        <p style="font-size: 18px;">
+            This will create fresh tasks in different statuses that you CAN drag!
+        </p>
+
+        <button class="create-button" onclick="createDraggableTasks()">
+            ✨ Create Draggable Tasks
+        </button>
+
+        <div id="status" class="status">
+            Ready to create fresh, draggable test tasks
+        </div>
+
+        <div id="task-list"></div>
+
+        <div style="margin-top: 30px;">
+            <p><strong>After creating tasks:</strong></p>
+            <a href="http://localhost:5001" target="_blank" style="color: #28a745; text-decoration: none; font-size: 18px;">
+                → Open Kanban Board to Test Dragging
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5001';
+
+        async function createDraggableTasks() {
+            const statusDiv = document.getElementById('status');
+            const taskListDiv = document.getElementById('task-list');
+
+            statusDiv.innerHTML = '<div class="info">🔄 Creating draggable tasks...</div>';
+            taskListDiv.innerHTML = '';
+
+            // Create tasks in different NON-DONE statuses
+            const tasksToCreate = [
+                {
+                    title: 'iPhone 15 Pro - Space Black 256GB',
+                    status: 'NEW',
+                    priority: 'high',
+                    description: 'Latest iPhone model with titanium design'
+                },
+                {
+                    title: 'Samsung Galaxy Watch 6',
+                    status: 'TRIAGE',
+                    priority: 'medium',
+                    description: 'Advanced health monitoring smartwatch'
+                },
+                {
+                    title: 'MacBook Pro M3 - 14 inch',
+                    status: 'ASSIGNED',
+                    priority: 'high',
+                    description: 'Professional laptop with M3 chip'
+                },
+                {
+                    title: 'AirPods Pro 2nd Generation',
+                    status: 'IN_PROGRESS',
+                    priority: 'medium',
+                    description: 'Noise cancelling wireless earbuds'
+                },
+                {
+                    title: 'iPad Air 5th Generation',
+                    status: 'READY_FOR_REVIEW',
+                    priority: 'low',
+                    description: 'Versatile tablet with M1 chip'
+                }
+            ];
+
+            let createdTasks = [];
+
+            for (const taskInfo of tasksToCreate) {
+                try {
+                    // Create product and task
+                    const response = await fetch(`${API_BASE}/api/products`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            product: {
+                                title: taskInfo.title,
+                                description: taskInfo.description,
+                                vendor: 'Apple Inc',
+                                sku: `DRAG-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                                price: `${(Math.random() * 1000 + 100).toFixed(2)}`,
+                                category: 'Electronics'
+                            },
+                            task: {
+                                priority: taskInfo.priority,
+                                receivedDate: new Date().toISOString()
+                            }
+                        }),
+                        credentials: 'include'
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+
+                        // Update status if different from NEW
+                        if (taskInfo.status !== 'NEW') {
+                            const statusResponse = await fetch(`${API_BASE}/api/tasks/${result.task.id}/status`, {
+                                method: 'PATCH',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ status: taskInfo.status }),
+                                credentials: 'include'
+                            });
+
+                            if (statusResponse.ok) {
+                                createdTasks.push({
+                                    ...result.task,
+                                    status: taskInfo.status,
+                                    title: taskInfo.title
+                                });
+                            }
+                        } else {
+                            createdTasks.push({
+                                ...result.task,
+                                title: taskInfo.title
+                            });
+                        }
+
+                        // Update UI
+                        taskListDiv.innerHTML += `
+                            <div class="task-preview">
+                                ✅ <strong>${taskInfo.title}</strong><br>
+                                Status: <span style="color: #28a745;">${taskInfo.status}</span> (Draggable!)<br>
+                                Priority: ${taskInfo.priority}
+                            </div>
+                        `;
+
+                    } else {
+                        const error = await response.text();
+                        console.error('Failed to create task:', error);
+                    }
+
+                    // Small delay between requests
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                } catch (error) {
+                    console.error('Error creating task:', error);
+                }
+            }
+
+            statusDiv.innerHTML = `
+                <div class="success">
+                    ✅ Created ${createdTasks.length} draggable tasks!<br>
+                    <strong>All tasks are in non-DONE statuses and can be dragged!</strong>
+                </div>
+            `;
+
+            setTimeout(() => {
+                statusDiv.innerHTML += `
+                    <br><br>
+                    <strong>🎯 Ready to test!</strong><br>
+                    Open the Kanban board and try dragging the cards between columns!
+                `;
+            }, 1000);
+        }
+
+        // Check if user is logged in
+        window.onload = async () => {
+            try {
+                const response = await fetch(`${API_BASE}/api/user`, {
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    document.getElementById('status').innerHTML = `
+                        <div class="error">
+                            ❌ Not logged in!
+                            <a href="http://localhost:5001/clear-and-test.html" style="color: #28a745;">
+                                Login first
+                            </a>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.log('Login check failed, but may be OK');
+            }
+        };
+    </script>
+</body>
+</html>

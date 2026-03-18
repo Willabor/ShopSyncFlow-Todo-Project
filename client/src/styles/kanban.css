@@ -1,0 +1,153 @@
+/* Kanban Board Performance Optimizations */
+
+.kanban-container {
+  /* Enable hardware acceleration */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+
+  /* Smooth scrolling */
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+
+  /* Improve performance during scroll */
+  will-change: scroll-position;
+}
+
+/* Smooth task transitions between columns */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.task-enter {
+  animation: fadeInScale 0.3s ease-out;
+}
+
+.kanban-column {
+  /* Optimize column rendering */
+  contain: layout style paint;
+
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+
+  /* Prevent layout shifts */
+  min-width: 320px;
+  max-width: 320px;
+}
+
+.task-card {
+  /* Hardware acceleration for smooth dragging */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+
+  /* Optimize for frequent changes during drag */
+  will-change: transform, box-shadow;
+
+  /* Improve text rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Better cursor states */
+  cursor: grab;
+
+  /* Ensure interaction works */
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
+
+  /* Ensure the element is interactive */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.task-card[draggable="false"] {
+  cursor: default;
+  opacity: 0.75;
+}
+
+.task-card[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+.task-card.dragging {
+  cursor: grabbing;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.task-card:hover {
+  /* Smooth hover animations */
+  transform: translateZ(0) translateY(-2px);
+  -webkit-transform: translateZ(0) translateY(-2px);
+}
+
+.task-card.dragging {
+  /* Enhanced dragging state */
+  transform: translateZ(0) rotate(3deg) scale(1.05);
+  -webkit-transform: translateZ(0) rotate(3deg) scale(1.05);
+
+  /* Ensure it's above everything */
+  z-index: 9999;
+
+  /* Smooth animation */
+  transition: none !important;
+}
+
+/* Ghost element while dragging */
+.task-card-ghost {
+  opacity: 0.3;
+  border: 2px dashed rgba(var(--primary), 0.5);
+  background: rgba(var(--primary), 0.05);
+}
+
+.drop-zone {
+  /* Smooth drop zone animations */
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.drop-zone.active {
+  /* Active drop zone state */
+  transform: translateZ(0) scale(1.02);
+  -webkit-transform: translateZ(0) scale(1.02);
+}
+
+/* Disable text selection during drag */
+.select-none {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Optimize placeholder rendering */
+.placeholder {
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+/* Smooth animations for all transitions */
+.transition-all {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .kanban-container,
+  .task-card,
+  .drop-zone,
+  .transition-all {
+    transition: none !important;
+    animation: none !important;
+  }
+}

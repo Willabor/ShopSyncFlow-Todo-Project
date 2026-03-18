@@ -1,0 +1,1140 @@
+═══════════════════════════════════════════════════════════
+  SHOPIFY VARIANT DATA TEST
+═══════════════════════════════════════════════════════════
+
+🏪 Store: nexus-clothes.myshopify.com
+
+📦 Fetching products with variants from Shopify...
+
+🔍 QUERY 1: Fetching basic product count...
+
+✅ Total products in Shopify: 5463
+
+🔍 QUERY 2: Fetching products with variant data...
+
+DEBUG: Response structure:
+  response.data: exists
+  response.data.products: exists
+  response.errors: none
+
+✅ Found 20 products
+
+======================================================================
+PRODUCT 1: New Era Colts On Field Knit 2015
+======================================================================
+Shopify ID: gid://shopify/Product/2080893304896
+Vendor: New Era
+Type: Headwear-Knit Beanies
+Total Variants: 1
+
+📋 OPTIONS (2):
+   1. Color: [Navy]
+   2. Size: [One Size]
+
+🏷️  METAFIELDS (1):
+   custom.product_id_amazon = 2080893304896 (single_line_text_field)
+
+🔧 VARIANTS (1):
+──────────────────────────────────────────────────────────────────────
+
+   Variant 1:
+   ├─ Title: Navy / One Size
+   ├─ SKU: 1910
+   ├─ Barcode: 889352986701
+   ├─ Price: $24.99
+   ├─ Inventory: 2
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Navy
+      └─ Size: One Size
+
+
+======================================================================
+PRODUCT 2: New Era Houston Texans On Field Knit 2015
+======================================================================
+Shopify ID: gid://shopify/Product/2080895959104
+Vendor: New Era
+Type: Headwear-Knit Beanies
+Total Variants: 1
+
+📋 OPTIONS (2):
+   1. Color: [Navy]
+   2. Size: [One Size]
+
+🏷️  METAFIELDS (1):
+   custom.product_id_amazon = 2080895959104 (single_line_text_field)
+
+🔧 VARIANTS (1):
+──────────────────────────────────────────────────────────────────────
+
+   Variant 1:
+   ├─ Title: Navy / One Size
+   ├─ SKU: 804
+   ├─ Barcode: 889352986756
+   ├─ Price: $24.99
+   ├─ Inventory: 2
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Navy
+      └─ Size: One Size
+
+
+======================================================================
+PRODUCT 3: Mitchell & Ness Men Montreal Maroons Cuff Knit Beanie (Burgundy)
+======================================================================
+Shopify ID: gid://shopify/Product/2080919748672
+Vendor: Mitchell & Ness
+Type: Headwear-Knit Beanies
+Total Variants: 1
+
+📋 OPTIONS (2):
+   1. Color: [Burgundy]
+   2. Size: [OneSize]
+
+🏷️  METAFIELDS (2):
+   custom.style_number = NHL CUFF MOMO KNIT (single_line_text_field)
+   custom.product_id_amazon = 2080919748672 (single_line_text_field)
+
+🔧 VARIANTS (1):
+──────────────────────────────────────────────────────────────────────
+
+   Variant 1:
+   ├─ Title: Burgundy / OneSize
+   ├─ SKU: 6357
+   ├─ Barcode: 886836137239
+   ├─ Price: $26.00
+   ├─ Inventory: 3
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Burgundy
+      └─ Size: OneSize
+
+
+======================================================================
+PRODUCT 4: Rebel Minds Men Triple Red Tee
+======================================================================
+Shopify ID: gid://shopify/Product/2080953237568
+Vendor: Rebel Minds
+Type: Men-Tops-T-Shirts
+Total Variants: 4
+
+📋 OPTIONS (2):
+   1. Color: [Red]
+   2. Size: [X-Large, Large, Small, Medium]
+
+🏷️  METAFIELDS (5):
+   custom.style_number = 62-194 (single_line_text_field)
+   custom.product_id_amazon = 2080953237568 (single_line_text_field)
+   custom.neck_style = Crew Neck (single_line_text_field)
+   custom.sleeve_type = Short Sleeve (single_line_text_field)
+   custom.closure_type = Pullover (single_line_text_field)
+
+🔧 VARIANTS (4):
+──────────────────────────────────────────────────────────────────────
+
+   Variant 1:
+   ├─ Title: Red / X-Large
+   ├─ SKU: 6461
+   ├─ Barcode: (none)
+   ├─ Price: $22.99
+   ├─ Inventory: 0
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Red
+      └─ Size: X-Large
+
+   Variant 2:
+   ├─ Title: Red / Large
+   ├─ SKU: 6460
+   ├─ Barcode: (none)
+   ├─ Price: $22.99
+   ├─ Inventory: 0
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Red
+      └─ Size: Large
+
+   Variant 3:
+   ├─ Title: Red / Small
+   ├─ SKU: 6458
+   ├─ Barcode: (none)
+   ├─ Price: $22.99
+   ├─ Inventory: 0
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Red
+      └─ Size: Small
+
+   Variant 4:
+   ├─ Title: Red / Medium
+   ├─ SKU: 6459
+   ├─ Barcode: (none)
+   ├─ Price: $22.99
+   ├─ Inventory: 0
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Red
+      └─ Size: Medium
+
+
+======================================================================
+PRODUCT 5: Rebel Minds Men Triple Khaki Tee
+======================================================================
+Shopify ID: gid://shopify/Product/2080953925696
+Vendor: Rebel Minds
+Type: Men-Tops-T-Shirts
+Total Variants: 4
+
+📋 OPTIONS (2):
+   1. Color: [Khaki]
+   2. Size: [Small, Medium, Large, X-Large]
+
+🏷️  METAFIELDS (5):
+   custom.style_number = 62-194 (single_line_text_field)
+   custom.product_id_amazon = 2080953925696 (single_line_text_field)
+   custom.closure_type = Pullover (single_line_text_field)
+   custom.sleeve_type = Short Sleeve (single_line_text_field)
+   custom.neck_style = Crew Neck (single_line_text_field)
+
+🔧 VARIANTS (4):
+──────────────────────────────────────────────────────────────────────
+
+   Variant 1:
+   ├─ Title: Khaki / Small
+   ├─ SKU: 6462
+   ├─ Barcode: (none)
+   ├─ Price: $22.99
+   ├─ Inventory: 0
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Khaki
+      └─ Size: Small
+
+   Variant 2:
+   ├─ Title: Khaki / Medium
+   ├─ SKU: 6463
+   ├─ Barcode: (none)
+   ├─ Price: $22.99
+   ├─ Inventory: 0
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Khaki
+      └─ Size: Medium
+
+   Variant 3:
+   ├─ Title: Khaki / Large
+   ├─ SKU: 6464
+   ├─ Barcode: (none)
+   ├─ Price: $22.99
+   ├─ Inventory: 0
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Khaki
+      └─ Size: Large
+
+   Variant 4:
+   ├─ Title: Khaki / X-Large
+   ├─ SKU: 6465
+   ├─ Barcode: (none)
+   ├─ Price: $22.99
+   ├─ Inventory: 0
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Khaki
+      └─ Size: X-Large
+
+
+======================================================================
+PRODUCT 6: Mitchell & Ness Golden State Warriors Long Sleeve Tee (Grey)
+======================================================================
+Shopify ID: gid://shopify/Product/2080958021696
+Vendor: Mitchell & Ness
+Type: Men-Tops-T-Shirts-Long Sleeve
+Total Variants: 6
+
+📋 OPTIONS (2):
+   1. Color: [Gray]
+   2. Size: [Medium, Large, X-Large, XX-Large, XXX-Large, XXXX-Large]
+
+🏷️  METAFIELDS (5):
+   custom.product_id_amazon = 2080958021696 (single_line_text_field)
+   custom.sleeve_type = Long Sleeve (single_line_text_field)
+   custom.neck_style = Crew Neck (single_line_text_field)
+   custom.closure_type = Pullover (single_line_text_field)
+   custom.style_number = WarriorLS (single_line_text_field)
+
+🔧 VARIANTS (6):
+──────────────────────────────────────────────────────────────────────
+
+   Variant 1:
+   ├─ Title: Gray / Medium
+   ├─ SKU: 6841
+   ├─ Barcode: 889764961891
+   ├─ Price: $22.95
+   ├─ Compare At Price: $45.00
+   ├─ Inventory: 0
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Gray
+      └─ Size: Medium
+
+   Variant 2:
+   ├─ Title: Gray / Large
+   ├─ SKU: 6842
+   ├─ Barcode: 889764961907
+   ├─ Price: $22.95
+   ├─ Compare At Price: $45.00
+   ├─ Inventory: 0
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Gray
+      └─ Size: Large
+
+   Variant 3:
+   ├─ Title: Gray / X-Large
+   ├─ SKU: 6843
+   ├─ Barcode: 889764961914
+   ├─ Price: $22.95
+   ├─ Compare At Price: $45.00
+   ├─ Inventory: 0
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Gray
+      └─ Size: X-Large
+
+   Variant 4:
+   ├─ Title: Gray / XX-Large
+   ├─ SKU: 6844
+   ├─ Barcode: 889764961921
+   ├─ Price: $22.95
+   ├─ Compare At Price: $45.00
+   ├─ Inventory: 1
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Gray
+      └─ Size: XX-Large
+
+   Variant 5:
+   ├─ Title: Gray / XXX-Large
+   ├─ SKU: 6845
+   ├─ Barcode: 889764961938
+   ├─ Price: $22.95
+   ├─ Compare At Price: $45.00
+   ├─ Inventory: 1
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Gray
+      └─ Size: XXX-Large
+
+   Variant 6:
+   ├─ Title: Gray / XXXX-Large
+   ├─ SKU: 6846
+   ├─ Barcode: 889764961945
+   ├─ Price: $22.95
+   ├─ Compare At Price: $45.00
+   ├─ Inventory: 1
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Gray
+      └─ Size: XXXX-Large
+
+
+======================================================================
+PRODUCT 7: College Football Stripe Deuce Socks 504
+======================================================================
+Shopify ID: gid://shopify/Product/2081076445248
+Vendor: For Bare Feet
+Type: Socks
+Total Variants: 12
+
+📋 OPTIONS (2):
+   1. Color: [N Carolina, Georgia, Oregon, Ohio State, West VA, Alabama, VA Tech, Duke, Kentucky Wildcat, Florida Gators, Kansas Jayhawks, USC Trojans]
+   2. Size: [Large]
+
+🏷️  METAFIELDS (2):
+   custom.style_number = 504 4-Stripe Deuce (single_line_text_field)
+   custom.product_id_amazon = 2081076445248 (single_line_text_field)
+
+🔧 VARIANTS (12):
+──────────────────────────────────────────────────────────────────────
+
+   Variant 1:
+   ├─ Title: N Carolina / Large
+   ├─ SKU: 8326
+   ├─ Barcode: 884837818362
+   ├─ Price: $6.95
+   ├─ Compare At Price: $13.49
+   ├─ Inventory: 0
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: N Carolina
+      └─ Size: Large
+
+   Variant 2:
+   ├─ Title: Georgia / Large
+   ├─ SKU: 8321
+   ├─ Barcode: 884837706836
+   ├─ Price: $6.95
+   ├─ Compare At Price: $13.49
+   ├─ Inventory: 0
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Georgia
+      └─ Size: Large
+
+   Variant 3:
+   ├─ Title: Oregon / Large
+   ├─ SKU: 8322
+   ├─ Barcode: 889536095762
+   ├─ Price: $6.95
+   ├─ Compare At Price: $13.49
+   ├─ Inventory: 0
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Oregon
+      └─ Size: Large
+
+   Variant 4:
+   ├─ Title: Ohio State / Large
+   ├─ SKU: 8324
+   ├─ Barcode: 884837707178
+   ├─ Price: $6.95
+   ├─ Compare At Price: $13.49
+   ├─ Inventory: 0
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Ohio State
+      └─ Size: Large
+
+   Variant 5:
+   ├─ Title: West VA / Large
+   ├─ SKU: 8325
+   ├─ Barcode: 884837707468
+   ├─ Price: $6.95
+   ├─ Compare At Price: $13.49
+   ├─ Inventory: 0
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: West VA
+      └─ Size: Large
+
+   Variant 6:
+   ├─ Title: Alabama / Large
+   ├─ SKU: 8319
+   ├─ Barcode: 884837706638
+   ├─ Price: $6.95
+   ├─ Compare At Price: $13.49
+   ├─ Inventory: 1
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Alabama
+      └─ Size: Large
+
+   Variant 7:
+   ├─ Title: VA Tech / Large
+   ├─ SKU: 8327
+   ├─ Barcode: 889536084018
+   ├─ Price: $6.95
+   ├─ Compare At Price: $13.49
+   ├─ Inventory: 0
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: VA Tech
+      └─ Size: Large
+
+   Variant 8:
+   ├─ Title: Duke / Large
+   ├─ SKU: 8328
+   ├─ Barcode: 884837706775
+   ├─ Price: $6.95
+   ├─ Compare At Price: $13.49
+   ├─ Inventory: 0
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Duke
+      └─ Size: Large
+
+   Variant 9:
+   ├─ Title: Kentucky Wildcat / Large
+   ├─ SKU: 28834
+   ├─ Barcode: 884837934512
+   ├─ Price: $6.95
+   ├─ Compare At Price: $13.49
+   ├─ Inventory: 2
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Kentucky Wildcat
+      └─ Size: Large
+
+   Variant 10:
+   ├─ Title: Florida Gators / Large
+   ├─ SKU: 32267
+   ├─ Barcode: 884837706799
+   ├─ Price: $6.95
+   ├─ Compare At Price: $13.49
+   ├─ Inventory: 0
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Florida Gators
+      └─ Size: Large
+
+   Variant 11:
+   ├─ Title: Kansas Jayhawks / Large
+   ├─ SKU: 32269
+   ├─ Barcode: 884837706935
+   ├─ Price: $6.95
+   ├─ Compare At Price: $13.49
+   ├─ Inventory: 0
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Kansas Jayhawks
+      └─ Size: Large
+
+   Variant 12:
+   ├─ Title: USC Trojans / Large
+   ├─ SKU: 32272
+   ├─ Barcode: 889536023499
+   ├─ Price: $6.95
+   ├─ Compare At Price: $13.49
+   ├─ Inventory: 0
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: USC Trojans
+      └─ Size: Large
+
+
+======================================================================
+PRODUCT 8: New Era New York Yankees Original Team color Basic 59FIFTY Fitted (Navy)
+======================================================================
+Shopify ID: gid://shopify/Product/2081116749888
+Vendor: New Era
+Type: Headwear-Baseball-Fitted
+Total Variants: 17
+
+📋 OPTIONS (2):
+   1. Color: [Navy]
+   2. Size: [7 1/8, 7 1/4, 7 3/8, 7 1/2, 7 5/8, 7 3/4, 7 7/8, 8, 7, 6 7/8, 8 1/4, 8 1/8, 8 3/8, 8 5/8, 6 3/4, 6 1/2, 6 3/8]
+
+🏷️  METAFIELDS (2):
+   custom.style_number = 70331909 (single_line_text_field)
+   custom.product_id_amazon = 2081116749888 (single_line_text_field)
+
+🔧 VARIANTS (17):
+──────────────────────────────────────────────────────────────────────
+
+   Variant 1:
+   ├─ Title: Navy / 7 1/8
+   ├─ SKU: 38166
+   ├─ Barcode: 193325881055
+   ├─ Price: $49.99
+   ├─ Inventory: 9
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Navy
+      └─ Size: 7 1/8
+
+   Variant 2:
+   ├─ Title: Navy / 7 1/4
+   ├─ SKU: 38167
+   ├─ Barcode: 193325881048
+   ├─ Price: $49.99
+   ├─ Inventory: 4
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Navy
+      └─ Size: 7 1/4
+
+   Variant 3:
+   ├─ Title: Navy / 7 3/8
+   ├─ SKU: 37990
+   ├─ Barcode: 193325881079
+   ├─ Price: $49.99
+   ├─ Inventory: 5
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Navy
+      └─ Size: 7 3/8
+
+   Variant 4:
+   ├─ Title: Navy / 7 1/2
+   ├─ SKU: 35538
+   ├─ Barcode: 193325881031
+   ├─ Price: $49.99
+   ├─ Inventory: 11
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Navy
+      └─ Size: 7 1/2
+
+   Variant 5:
+   ├─ Title: Navy / 7 5/8
+   ├─ SKU: 35539
+   ├─ Barcode: 193325881086
+   ├─ Price: $49.99
+   ├─ Inventory: 7
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Navy
+      └─ Size: 7 5/8
+
+   Variant 6:
+   ├─ Title: Navy / 7 3/4
+   ├─ SKU: 35540
+   ├─ Barcode: 193325881062
+   ├─ Price: $49.99
+   ├─ Inventory: 3
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Navy
+      └─ Size: 7 3/4
+
+   Variant 7:
+   ├─ Title: Navy / 7 7/8
+   ├─ SKU: 37989
+   ├─ Barcode: 193325881093
+   ├─ Price: $49.99
+   ├─ Inventory: 6
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Navy
+      └─ Size: 7 7/8
+
+   Variant 8:
+   ├─ Title: Navy / 8
+   ├─ SKU: 35541
+   ├─ Barcode: 193325881109
+   ├─ Price: $49.99
+   ├─ Inventory: 5
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Navy
+      └─ Size: 8
+
+   Variant 9:
+   ├─ Title: Navy / 7
+   ├─ SKU: 39324
+   ├─ Barcode: 193325881024
+   ├─ Price: $49.99
+   ├─ Inventory: 4
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Navy
+      └─ Size: 7
+
+   Variant 10:
+   ├─ Title: Navy / 6 7/8
+   ├─ SKU: 39325
+   ├─ Barcode: 193325881017
+   ├─ Price: $49.99
+   ├─ Inventory: 7
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Navy
+      └─ Size: 6 7/8
+
+   Variant 11:
+   ├─ Title: Navy / 8 1/4
+   ├─ SKU: 39326
+   ├─ Barcode: 193325881116
+   ├─ Price: $49.99
+   ├─ Inventory: 3
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Navy
+      └─ Size: 8 1/4
+
+   Variant 12:
+   ├─ Title: Navy / 8 1/8
+   ├─ SKU: 39327
+   ├─ Barcode: 193325881123
+   ├─ Price: $49.99
+   ├─ Inventory: 3
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Navy
+      └─ Size: 8 1/8
+
+   Variant 13:
+   ├─ Title: Navy / 8 3/8
+   ├─ SKU: 106008
+   ├─ Barcode: 190844729493
+   ├─ Price: $49.99
+   ├─ Inventory: 2
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Navy
+      └─ Size: 8 3/8
+
+   Variant 14:
+   ├─ Title: Navy / 8 5/8
+   ├─ SKU: 106009
+   ├─ Barcode: 190844729509
+   ├─ Price: $49.99
+   ├─ Inventory: 1
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Navy
+      └─ Size: 8 5/8
+
+   Variant 15:
+   ├─ Title: Navy / 6 3/4
+   ├─ SKU: 106010
+   ├─ Barcode: 190844728229
+   ├─ Price: $49.99
+   ├─ Inventory: 2
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Navy
+      └─ Size: 6 3/4
+
+   Variant 16:
+   ├─ Title: Navy / 6 1/2
+   ├─ SKU: 106022
+   ├─ Barcode: 190844728212
+   ├─ Price: $49.99
+   ├─ Inventory: 2
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Navy
+      └─ Size: 6 1/2
+
+   Variant 17:
+   ├─ Title: Navy / 6 3/8
+   ├─ SKU: 106021
+   ├─ Barcode: 190844728236
+   ├─ Price: $49.99
+   ├─ Inventory: 2
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Navy
+      └─ Size: 6 3/8
+
+
+======================================================================
+PRODUCT 9: For Bare Feet Bridgewater Vikings Socks
+======================================================================
+Shopify ID: gid://shopify/Product/2081147715648
+Vendor: For Bare Feet
+Type: Socks
+Total Variants: 1
+
+📋 OPTIONS (2):
+   1. Color: [Blue]
+   2. Size: [Large]
+
+🏷️  METAFIELDS (2):
+   custom.style_number = V-308S-F055 (single_line_text_field)
+   custom.product_id_amazon = 2081147715648 (single_line_text_field)
+
+🔧 VARIANTS (1):
+──────────────────────────────────────────────────────────────────────
+
+   Variant 1:
+   ├─ Title: Blue / Large
+   ├─ SKU: 8838
+   ├─ Barcode: 7890496683237
+   ├─ Price: $9.95
+   ├─ Compare At Price: $18.00
+   ├─ Inventory: 6
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Blue
+      └─ Size: Large
+
+
+======================================================================
+PRODUCT 10: For Bare Feet Bengals Socks
+======================================================================
+Shopify ID: gid://shopify/Product/2081149714496
+Vendor: For Bare Feet
+Type: Socks
+Total Variants: 1
+
+📋 OPTIONS (2):
+   1. Color: [Orange]
+   2. Size: [Large]
+
+🏷️  METAFIELDS (2):
+   custom.style_number = V-308S-F024 (single_line_text_field)
+   custom.product_id_amazon = 2081149714496 (single_line_text_field)
+
+🔧 VARIANTS (1):
+──────────────────────────────────────────────────────────────────────
+
+   Variant 1:
+   ├─ Title: Orange / Large
+   ├─ SKU: 8837
+   ├─ Barcode: 7890496683220
+   ├─ Price: $9.95
+   ├─ Compare At Price: $18.00
+   ├─ Inventory: 3
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Orange
+      └─ Size: Large
+
+
+======================================================================
+PRODUCT 11: New Era Men Chicago Cubs 9/20 Hat Blue
+======================================================================
+Shopify ID: gid://shopify/Product/2081150632000
+Vendor: New Era
+Type: Headwear-Baseball-Dad Hat
+Total Variants: 1
+
+📋 OPTIONS (2):
+   1. Color: [Blue]
+   2. Size: [One Size]
+
+🏷️  METAFIELDS (2):
+   custom.style_number = 11417822 (single_line_text_field)
+   custom.product_id_amazon = 2081150632000 (single_line_text_field)
+
+🔧 VARIANTS (1):
+──────────────────────────────────────────────────────────────────────
+
+   Variant 1:
+   ├─ Title: Blue / One Size
+   ├─ SKU: 32767
+   ├─ Barcode: 884990275484
+   ├─ Price: $21.99
+   ├─ Inventory: 2
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Blue
+      └─ Size: One Size
+
+
+======================================================================
+PRODUCT 12: EPTM Satin Dad Hat (Burgundy)
+======================================================================
+Shopify ID: gid://shopify/Product/2081162723392
+Vendor: EPTM
+Type: Headwear-Baseball-Dad Hat
+Total Variants: 1
+
+📋 OPTIONS (2):
+   1. Color: [Burgundy]
+   2. Size: [One Size]
+
+🏷️  METAFIELDS (2):
+   custom.style_number = EP7123 (single_line_text_field)
+   custom.product_id_amazon = 2081162723392 (single_line_text_field)
+
+🔧 VARIANTS (1):
+──────────────────────────────────────────────────────────────────────
+
+   Variant 1:
+   ├─ Title: Burgundy / One Size
+   ├─ SKU: 8910
+   ├─ Barcode: 7890496683756
+   ├─ Price: $12.95
+   ├─ Compare At Price: $25.00
+   ├─ Inventory: 2
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Burgundy
+      └─ Size: One Size
+
+
+======================================================================
+PRODUCT 13: Mitchell & Ness Grizzlies Change Up Pom Knit
+======================================================================
+Shopify ID: gid://shopify/Product/2081219149888
+Vendor: Mitchell & Ness
+Type: Headwear-Knit Beanies
+Total Variants: 1
+
+📋 OPTIONS (2):
+   1. Color: [Multi]
+   2. Size: [OneSize]
+
+🏷️  METAFIELDS (2):
+   custom.style_number = KZ53Z (single_line_text_field)
+   custom.product_id_amazon = 2081219149888 (single_line_text_field)
+
+🔧 VARIANTS (1):
+──────────────────────────────────────────────────────────────────────
+
+   Variant 1:
+   ├─ Title: Multi / OneSize
+   ├─ SKU: 9543
+   ├─ Barcode: 888599950643
+   ├─ Price: $25.00
+   ├─ Inventory: 0
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Multi
+      └─ Size: OneSize
+
+
+======================================================================
+PRODUCT 14: Mitchell & Ness Brooklyn Nets Foil Leather Cuffed Beanie
+======================================================================
+Shopify ID: gid://shopify/Product/2081222393920
+Vendor: Mitchell & Ness
+Type: Headwear-Knit Beanies
+Total Variants: 1
+
+📋 OPTIONS (2):
+   1. Color: [Charcoal]
+   2. Size: [OneSize]
+
+🏷️  METAFIELDS (2):
+   custom.style_number = KZ57Z (single_line_text_field)
+   custom.product_id_amazon = 2081222393920 (single_line_text_field)
+
+🔧 VARIANTS (1):
+──────────────────────────────────────────────────────────────────────
+
+   Variant 1:
+   ├─ Title: Charcoal / OneSize
+   ├─ SKU: 9580
+   ├─ Barcode: 888599950766
+   ├─ Price: $25.00
+   ├─ Inventory: 0
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Charcoal
+      └─ Size: OneSize
+
+
+======================================================================
+PRODUCT 15: Mitchell & Ness Toronto Raptors Change Up Pom Knit
+======================================================================
+Shopify ID: gid://shopify/Product/2081224687680
+Vendor: Mitchell & Ness
+Type: Headwear-Knit Beanies
+Total Variants: 1
+
+📋 OPTIONS (2):
+   1. Color: [Red]
+   2. Size: [OneSize]
+
+🏷️  METAFIELDS (2):
+   custom.style_number = KZ53Z (single_line_text_field)
+   custom.product_id_amazon = 2081224687680 (single_line_text_field)
+
+🔧 VARIANTS (1):
+──────────────────────────────────────────────────────────────────────
+
+   Variant 1:
+   ├─ Title: Red / OneSize
+   ├─ SKU: 9542
+   ├─ Barcode: 888599950636
+   ├─ Price: $12.95
+   ├─ Compare At Price: $25.00
+   ├─ Inventory: 0
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Red
+      └─ Size: OneSize
+
+
+======================================================================
+PRODUCT 16: For Bare Feet Detroit Pistons Drummond Pro Stripe Socks
+======================================================================
+Shopify ID: gid://shopify/Product/2081285636160
+Vendor: For Bare Feet
+Type: Socks
+Total Variants: 1
+
+📋 OPTIONS (2):
+   1. Color: [Blue]
+   2. Size: [Large]
+
+🏷️  METAFIELDS (2):
+   custom.style_number = V-308S-B08 (single_line_text_field)
+   custom.product_id_amazon = 2081285636160 (single_line_text_field)
+
+🔧 VARIANTS (1):
+──────────────────────────────────────────────────────────────────────
+
+   Variant 1:
+   ├─ Title: Blue / Large
+   ├─ SKU: 10658
+   ├─ Barcode: 7890496687419
+   ├─ Price: $18.00
+   ├─ Inventory: 7
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Blue
+      └─ Size: Large
+
+
+======================================================================
+PRODUCT 17: For Bare Feet New Orleans Pelicans A.Davis Pro Stripe Socks
+======================================================================
+Shopify ID: gid://shopify/Product/2081287274560
+Vendor: For Bare Feet
+Type: Socks
+Total Variants: 1
+
+📋 OPTIONS (2):
+   1. Color: [Yellow]
+   2. Size: [Large]
+
+🏷️  METAFIELDS (2):
+   custom.style_number = V-308S-B33 (single_line_text_field)
+   custom.product_id_amazon = 2081287274560 (single_line_text_field)
+
+🔧 VARIANTS (1):
+──────────────────────────────────────────────────────────────────────
+
+   Variant 1:
+   ├─ Title: Yellow / Large
+   ├─ SKU: 10661
+   ├─ Barcode: 7890496687440
+   ├─ Price: $18.00
+   ├─ Inventory: 6
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Yellow
+      └─ Size: Large
+
+
+======================================================================
+PRODUCT 18: G3 Atlanta Falcons Hands High L/S Tee
+======================================================================
+Shopify ID: gid://shopify/Product/2081325973568
+Vendor: G-III Sports
+Type: Men-Tops-T-Shirts-Long Sleeve
+Total Variants: 2
+
+📋 OPTIONS (2):
+   1. Color: [Black]
+   2. Size: [X-Large, XX-Large]
+
+🏷️  METAFIELDS (5):
+   custom.style_number = 6A60B099 (single_line_text_field)
+   custom.product_id_amazon = 2081325973568 (single_line_text_field)
+   custom.sleeve_type = Long Sleeve (single_line_text_field)
+   custom.neck_style = Crew Neck (single_line_text_field)
+   custom.closure_type = Pullover (single_line_text_field)
+
+🔧 VARIANTS (2):
+──────────────────────────────────────────────────────────────────────
+
+   Variant 1:
+   ├─ Title: Black / X-Large
+   ├─ SKU: 11277
+   ├─ Barcode: 190427793347
+   ├─ Price: $25.00
+   ├─ Compare At Price: $45.00
+   ├─ Inventory: 1
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Black
+      └─ Size: X-Large
+
+   Variant 2:
+   ├─ Title: Black / XX-Large
+   ├─ SKU: 11278
+   ├─ Barcode: 190427793330
+   ├─ Price: $25.00
+   ├─ Compare At Price: $45.00
+   ├─ Inventory: 1
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Black
+      └─ Size: XX-Large
+
+
+======================================================================
+PRODUCT 19: G3 Patriots Waffled Hoodie Navy
+======================================================================
+Shopify ID: gid://shopify/Product/2081328201792
+Vendor: G-III Sports
+Type: Men-Tops-Hoodies & Sweatshirts
+Total Variants: 2
+
+📋 OPTIONS (2):
+   1. Color: [Navy]
+   2. Size: [Large, X-Large]
+
+🏷️  METAFIELDS (5):
+   custom.style_number = 6A600125 (single_line_text_field)
+   custom.product_id_amazon = 2081328201792 (single_line_text_field)
+   custom.neck_style = Hooded (single_line_text_field)
+   custom.sleeve_type = Long Sleeve (single_line_text_field)
+   custom.closure_type = Pullover (single_line_text_field)
+
+🔧 VARIANTS (2):
+──────────────────────────────────────────────────────────────────────
+
+   Variant 1:
+   ├─ Title: Navy / Large
+   ├─ SKU: 11280
+   ├─ Barcode: 647080352317
+   ├─ Price: $25.95
+   ├─ Compare At Price: $50.00
+   ├─ Inventory: 1
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Navy
+      └─ Size: Large
+
+   Variant 2:
+   ├─ Title: Navy / X-Large
+   ├─ SKU: 11281
+   ├─ Barcode: 647080352300
+   ├─ Price: $25.95
+   ├─ Compare At Price: $50.00
+   ├─ Inventory: 6
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Navy
+      └─ Size: X-Large
+
+
+======================================================================
+PRODUCT 20: Mitchell & Ness Cleveland Cavaliers Reverse Denim Dad Hat
+======================================================================
+Shopify ID: gid://shopify/Product/2081353367616
+Vendor: Mitchell & Ness
+Type: Headwear-Baseball-Dad Hat
+Total Variants: 1
+
+📋 OPTIONS (2):
+   1. Color: [Gray]
+   2. Size: [OneSize]
+
+🏷️  METAFIELDS (2):
+   custom.style_number = QA32Z (single_line_text_field)
+   custom.product_id_amazon = 2081353367616 (single_line_text_field)
+
+🔧 VARIANTS (1):
+──────────────────────────────────────────────────────────────────────
+
+   Variant 1:
+   ├─ Title: Gray / OneSize
+   ├─ SKU: 11535
+   ├─ Barcode: 888599640520
+   ├─ Price: $30.00
+   ├─ Inventory: 5
+   ├─ Weight: undefined undefined
+   └─ Options:
+      ├─ Color: Gray
+      └─ Size: OneSize
+
+
+═══════════════════════════════════════════════════════════
+  KEY INSIGHTS
+═══════════════════════════════════════════════════════════
+
+📊 Statistics:
+   Total Products: 20
+   Total Variants: 60
+   Avg Variants per Product: 3.0
+   Products with multiple variants: 7
+   Max variants in a product: 17
+
+💡 Findings:
+   • Options define the variant structure (Size, Color, etc.)
+   • Each variant has selectedOptions that map to the product options
+   • SKU and Barcode are at the variant level
+   • Shopify uses option1, option2, option3 internally
+   • Our database already matches this structure!
+
+✅ Test completed
+

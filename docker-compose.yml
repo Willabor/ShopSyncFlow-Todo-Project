@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  shopsyncflow:
+    build:
+      context: ..
+      dockerfile: ShopSyncFlow-Todo-Project/Dockerfile
+    container_name: shopsyncflow-app
+    restart: unless-stopped
+
+    ports:
+      - "6002:5000"  # Map container port 5000 to host port 6002
+
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - APP_URL=${APP_URL}
+      - APP_DOMAIN=${APP_DOMAIN:-tasks.nexusdenim.com}
+      - DATABASE_URL=postgresql://${PGUSER:-shopsyncflow_user}:${PGPASSWORD}@postgres16:5432/${PGDATABASE:-shopsyncflow_db}
+      - PGHOST=postgres16
+      - PGPORT=5432
+      - PGDATABASE=${PGDATABASE:-shopsyncflow_db}
+      - PGUSER=${PGUSER:-shopsyncflow_user}
+      - PGPASSWORD=${PGPASSWORD}
+      - SESSION_SECRET=${SESSION_SECRET:-change-this-in-production-please}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - SCRAPER_AI_ENABLED=1
+      - PUPPETEER_SERVICE_ENABLED=0
+      - GOOGLE_ADS_CLIENT_ID=${GOOGLE_ADS_CLIENT_ID}
+      - GOOGLE_ADS_CLIENT_SECRET=${GOOGLE_ADS_CLIENT_SECRET}
+      - GOOGLE_ADS_DEVELOPER_TOKEN=${GOOGLE_ADS_DEVELOPER_TOKEN}
+      - GOOGLE_ADS_LOGIN_CUSTOMER_ID=${GOOGLE_ADS_LOGIN_CUSTOMER_ID}
+      - GOOGLE_ADS_CUSTOMER_ID=${GOOGLE_ADS_CUSTOMER_ID}
+      - GOOGLE_ADS_REFRESH_TOKEN=${GOOGLE_ADS_REFRESH_TOKEN}
+      - SHOPIFY_STORE_URL=${SHOPIFY_STORE_URL}
+      - SHOPIFY_ACCESS_TOKEN=${SHOPIFY_ACCESS_TOKEN}
+      # OpenRouter fallback AI
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - OPENROUTER_DEFAULT_MODEL=${OPENROUTER_DEFAULT_MODEL:-moonshotai/kimi-k2.5}
+      # Email Configuration (SMTP)
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - FROM_EMAIL=${FROM_EMAIL}
+      - FROM_NAME=${FROM_NAME:-ShopSyncFlow}
+      - TZ=America/New_York
+
+    networks:
+      - postgres_default
+
+    volumes:
+      # Persist uploaded files
+      - ./server/uploads:/app/server/uploads
+      # Persist logs
+      - ./logs:/app/logs
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    labels:
+      - "com.docker.compose.project=shopsyncflow"
+
+networks:
+  postgres_default:
+    external: true

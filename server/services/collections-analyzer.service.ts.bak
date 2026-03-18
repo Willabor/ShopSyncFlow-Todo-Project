@@ -1,0 +1,331 @@
+/**
+ * Collections Analyzer Service
+ *
+ * Analyzes Shopify smart collections to identify which ones have rules based on
+ * the old category system. These collections need to be updated before/during migration.
+ */
+
+import { shopifyService } from "../shopify";
+import { storage } from "../storage";
+import { CATEGORY_MAPPINGS } from "./category-mappings";
+
+export interface CollectionRule {
+  column: string; // "tag", "product_type", "variant_title", etc.
+  relation: string; // "equals", "contains", "starts_with", etc.
+  condition: string; // the value to match
+}
+
+export interface CollectionRuleSet {
+  rules: CollectionRule[];
+  disjunctive: boolean; // true = OR, false = AND
+}
+
+export interface CollectionAnalysis {
+  id: string;
+  shopifyId: string;
+  name: string;
+  handle: string;
+  productCount: number;
+  ruleSet: CollectionRuleSet | null;
+  hasCategoryRules: boolean;
+  affectedByMigration: string[]; // list of categories that affect this collection
+  recommendedNewRules: CollectionRule[] | null;
+  requiresUpdate: boolean;
+}
+
+export interface CollectionsAnalysisReport {
+  totalCollections: number;
+  smartCollections: number;
+  manualCollections: number;
+  collectionsWithCategoryRules: number;
+  affectedCollections: CollectionAnalysis[];
+  summary: {
+    readyForMigration: boolean;
+    warnings: string[];
+    recommendations: string[];
+  };
+}
+
+class CollectionsAnalyzerService {
+  /**
+   * Analyze all collections to identify which ones will be affected by category migration
+   */
+  async analyzeCollections(): Promise<CollectionsAnalysisReport> {
+    console.log("🔍 Starting collections analysis...");
+
+    const report: CollectionsAnalysisReport = {
+      totalCollections: 0,
+      smartCollections: 0,
+      manualCollections: 0,
+      collectionsWithCategoryRules: 0,
+      affectedCollections: [],
+      summary: {
+        readyForMigration: true,
+        warnings: [],
+        recommendations: []
+      }
+    };
+
+    try {
+      // Fetch all smart collections from Shopify with their rules
+      const smartCollections = await this.fetchAllSmartCollections();
+
+      report.smartCollections = smartCollections.length;
+      console.log(`📦 Found ${smartCollections.length} smart collections`);
+
+      // Analyze each smart collection
+      for (const collection of smartCollections) {
+        const analysis = await this.analyzeSmartCollection(collection);
+
+        if (analysis.hasCategoryRules) {
+          report.collectionsWithCategoryRules++;
+          report.affectedCollections.push(analysis);
+
+          if (analysis.requiresUpdate) {
+            report.summary.readyForMigration = false;
+            report.summary.warnings.push(
+              `Collection "${analysis.name}" has category-based rules that must be updated before migration`
+            );
+          }
+        }
+      }
+
+      // Get manual collections count
+      const allCollections = await storage.getAllCollections();
+      report.totalCollections = allCollections.total;
+      report.manualCollections = report.totalCollections - report.smartCollections;
+
+      // Generate recommendations
+      if (report.collectionsWithCategoryRules > 0) {
+        report.summary.recommendations.push(
+          `Update ${report.collectionsWithCategoryRules} smart collection(s) before running migration`
+        );
+        report.summary.recommendations.push(
+          "Test collection rules in Shopify admin after updating to ensure products still appear correctly"
+        );
+      } else {
+        report.summary.recommendations.push(
+          "No smart collections with category rules detected - safe to proceed with migration"
+        );
+      }
+
+      console.log(`\n✅ Analysis complete:`);
+      console.log(`   Total collections: ${report.totalCollections}`);
+      console.log(`   Smart collections: ${report.smartCollections}`);
+      console.log(`   Collections with category rules: ${report.collectionsWithCategoryRules}`);
+      console.log(`   Ready for migration: ${report.summary.readyForMigration ? "YES" : "NO"}`);
+
+      return report;
+
+    } catch (error: any) {
+      console.error("❌ Error analyzing collections:", error);
+      report.summary.readyForMigration = false;
+      report.summary.warnings.push(`Failed to analyze collections: ${error.message}`);
+      return report;
+    }
+  }
+
+  /**
+   * Fetch all smart collections from Shopify with their rules
+   */
+  private async fetchAllSmartCollections(): Promise<any[]> {
+    const collections: any[] = [];
+    let hasNextPage = true;
+    let cursor: string | null = null;
+
+    while (hasNextPage) {
+      const query = `
+        query ($cursor: String) {
+          collections(first: 50, after: $cursor, query: "collection_type:smart") {
+            edges {
+              cursor
+              node {
+                id
+                title
+                handle
+                productsCount
+                ruleSet {
+                  rules {
+                    column
+                    relation
+                    condition
+                  }
+                  appliedDisjunctively
+                }
+              }
+            }
+            pageInfo {
+              hasNextPage
+            }
+          }
+        }
+      `;
+
+      const variables: { cursor?: string } = cursor ? { cursor } : {};
+      const response: any = await shopifyService.makeGraphQLRequest(query, variables);
+
+      if (response?.data?.collections?.edges) {
+        for (const edge: any of response.data.collections.edges) {
+          collections.push(edge.node);
+          cursor = edge.cursor;
+        }
+
+        hasNextPage = response.data.collections.pageInfo.hasNextPage;
+      } else {
+        hasNextPage = false;
+      }
+    }
+
+    return collections;
+  }
+
+  /**
+   * Analyze a single smart collection to see if it's affected by category migration
+   */
+  private async analyzeSmartCollection(collection: any): Promise<CollectionAnalysis> {
+    const analysis: CollectionAnalysis = {
+      id: collection.id,
+      shopifyId: collection.id,
+      name: collection.title,
+      handle: collection.handle,
+      productCount: collection.productsCount || 0,
+      ruleSet: collection.ruleSet ? {
+        rules: collection.ruleSet.rules || [],
+        disjunctive: collection.ruleSet.appliedDisjunctively || false
+      } : null,
+      hasCategoryRules: false,
+      affectedByMigration: [],
+      recommendedNewRules: null,
+      requiresUpdate: false
+    };
+
+    if (!collection.ruleSet || !collection.ruleSet.rules) {
+      return analysis;
+    }
+
+    // Check each rule to see if it uses the old category system
+    for (const rule of collection.ruleSet.rules) {
+      // Check if rule uses product_type field (which was storing category)
+      // OR if rule uses tag that matches a category name
+      if (rule.column === 'TYPE' || rule.column === 'PRODUCT_TYPE') {
+        // This collection uses product_type which might have been storing categories
+        // Check if the condition matches any known category
+        const categoryMatch = Object.keys(CATEGORY_MAPPINGS).find(
+          catName => rule.condition === catName
+        );
+
+        if (categoryMatch) {
+          analysis.hasCategoryRules = true;
+          analysis.affectedByMigration.push(categoryMatch);
+          analysis.requiresUpdate = true;
+        }
+      }
+
+      // Check if rule uses TAG that matches a category name exactly
+      if (rule.column === 'TAG') {
+        const categoryMatch = Object.keys(CATEGORY_MAPPINGS).find(
+          catName => rule.condition === catName
+        );
+
+        if (categoryMatch) {
+          analysis.hasCategoryRules = true;
+          analysis.affectedByMigration.push(categoryMatch);
+          // Tags might be okay if they're staying, but flag for review
+        }
+      }
+    }
+
+    // Generate recommended new rules if affected
+    if (analysis.requiresUpdate && analysis.affectedByMigration.length > 0) {
+      analysis.recommendedNewRules = this.generateNewRules(
+        analysis.affectedByMigration[0],
+        collection.ruleSet
+      );
+    }
+
+    return analysis;
+  }
+
+  /**
+   * Generate new tag-based rules to replace category-based rules
+   */
+  private generateNewRules(categoryName: string, oldRuleSet: any): CollectionRule[] {
+    const mapping = CATEGORY_MAPPINGS[categoryName];
+    if (!mapping) {
+      return [];
+    }
+
+    // Create multiple tag-based rules (all must match = AND logic)
+    const newRules: CollectionRule[] = mapping.tags.map(tag => ({
+      column: 'TAG',
+      relation: 'EQUALS',
+      condition: tag
+    }));
+
+    return newRules;
+  }
+
+  /**
+   * Update a collection's rules in Shopify
+   */
+  async updateCollectionRules(
+    collectionId: string,
+    newRules: CollectionRule[],
+    disjunctive: boolean = false
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      console.log(`🔧 Updating collection rules for ${collectionId}...`);
+
+      const mutation = `
+        mutation updateCollection($input: CollectionInput!) {
+          collectionUpdate(input: $input) {
+            collection {
+              id
+              title
+              ruleSet {
+                rules {
+                  column
+                  relation
+                  condition
+                }
+                appliedDisjunctively
+              }
+            }
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+      `;
+
+      const variables = {
+        input: {
+          id: collectionId,
+          ruleSet: {
+            rules: newRules,
+            appliedDisjunctively: disjunctive
+          }
+        }
+      };
+
+      const response = await shopifyClient.request(mutation, { variables });
+
+      if (response?.data?.collectionUpdate?.userErrors?.length > 0) {
+        const errors = response.data.collectionUpdate.userErrors
+          .map((e: any) => e.message)
+          .join(", ");
+        return { success: false, error: errors };
+      }
+
+      console.log(`✅ Collection rules updated successfully`);
+      return { success: true };
+
+    } catch (error: any) {
+      console.error(`❌ Error updating collection rules:`, error);
+      return { success: false, error: error.message };
+    }
+  }
+}
+
+export default new CollectionsAnalyzerService();

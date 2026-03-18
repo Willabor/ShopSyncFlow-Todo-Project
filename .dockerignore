@@ -1,0 +1,50 @@
+# Dependencies
+node_modules
+npm-debug.log
+
+# Build outputs
+dist
+build
+.next
+
+# Test outputs
+playwright-report
+test-results
+coverage
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+docs
+
+# Cache
+.cache
+.eslintcache
+
+# Logs
+logs
+*.log
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose*.yml
