@@ -2,6 +2,50 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Team & Git Workflow
+
+### Team
+| Person | GitHub | Role |
+|--------|--------|------|
+| **Wail Shawky** | Willabor | Project owner, full-stack development |
+| **Merhan Farouk** | merhanfarouk41-cmyk | Developer, full-stack development |
+
+### Branching Rules
+- **`main`** — Production branch. **LOCKED. Never push directly.** Changes go through Pull Requests only.
+- **`develop`** — Active development branch. Both developers push here.
+- Always `git pull origin develop` before starting work to get the other person's changes.
+- Write clear commit messages describing what and why.
+
+### Git Workflow (Daily)
+```bash
+# Before starting work
+git pull origin develop
+
+# After finishing work
+git add <specific-files>
+git commit -m "descriptive message"
+git push origin develop
+```
+
+### Deployment (NAS)
+The app runs in Docker on a Synology NAS at `tasks.nexusdenim.com`.
+```bash
+# Deploy from any machine with SSH access to nexus-nas
+ssh nexus-nas "cd /volume1/docker/ShopSyncFlow-Todo-Project && git pull origin develop && /usr/local/bin/docker compose up --build -d"
+```
+- **Container:** `shopsyncflow-app` on port 6002→5000
+- **NAS path:** `/volume1/docker/ShopSyncFlow-Todo-Project`
+- **Database:** PostgreSQL at `192.168.1.26:5433` (local network) / `100.124.10.65:5433` (Tailscale)
+
+### Critical Rules
+1. **Never commit `.env` files** — they contain production secrets and are gitignored
+2. **Both developers share the same database** — be careful with destructive migrations or schema changes
+3. **Always pull before pushing** — avoids merge conflicts
+4. **If you get a merge conflict** — resolve it carefully, don't just overwrite the other person's work
+5. **The Clerk** is installed on both machines — it auto-records Claude Code sessions in `.claude/clerk/`
+
+---
+
 ## Development Commands
 
 ```bash
