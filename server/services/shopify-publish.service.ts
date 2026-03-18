@@ -10,14 +10,14 @@
  *   - SHOPIFY_ACCESS_TOKEN (or SHOPIFY_ADMIN_API_KEY for legacy)
  *
  * Current Status: read_products, read_product_listings, read_inventory
- * Required: write_products (ADD THIS SCOPE IN SHOPIFY APP SETTINGS)
+ * Required: write_products, write_inventory (ADD THESE SCOPES IN SHOPIFY APP SETTINGS)
  */
 
 import type { Product, ProductOption, ProductVariant } from "@shared/schema";
-import { items, itemLevels, products } from "@shared/schema";
+import { items, itemLevels, ssfLocations, products } from "@shared/schema";
 import { storage } from "../storage";
 import { db } from "../db";
-import { eq, and, inArray, sql } from "drizzle-orm";
+import { eq, and, inArray, sql, isNotNull } from "drizzle-orm";
 import * as fs from "fs";
 import * as path from "path";
 import { SIZE_ORDER } from "../../shared/size-utils";
@@ -82,6 +82,7 @@ interface ShopifyProductResponse {
       option2: string | null;
       option3: string | null;
       image_id?: number | null;
+      inventory_item_id?: number;
     }>;
     images?: Array<{
       id: number;
@@ -110,6 +111,242 @@ export class ShopifyPublishService {
       throw new Error(
         "Shopify credentials not configured. Set SHOPIFY_STORE_URL and SHOPIFY_ACCESS_TOKEN environment variables."
       );
+    }
+  }
+
+  /**
+   * Make a GraphQL request to the Shopify Admin API.
+   */
+  private async makeGraphQLRequest<T = any>(query: string, variables: Record<string, any>): Promise<T> {
+    const graphqlUrl = `https://${this.storeUrl}/admin/api/${this.apiVersion}/graphql.json`;
+    const response = await fetch(graphqlUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Access-Token': this.accessToken,
+      },
+      body: JSON.stringify({ query, variables }),
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`Shopify GraphQL API ${response.status}: ${text}`);
+    }
+
+    const result = await response.json();
+    if (result.errors) {
+      throw new Error(`GraphQL errors: ${JSON.stringify(result.errors)}`);
+    }
+
+    return result.data as T;
+  }
+
+  /**
+   * Get per-location inventory for a list of SKUs.
+   * Returns: { sku: { shopifyLocationId: quantity } }
+   */
+  private async getPerLocationInventory(
+    tenantId: string,
+    skus: string[]
+  ): Promise<Record<string, Record<string, number>>> {
+    if (skus.length === 0) return {};
+    try {
+      const rows = await db.select({
+        itemNumber: items.itemNumber,
+        locationExternalId: ssfLocations.externalId,
+        quantity: itemLevels.quantity,
+      })
+      .from(itemLevels)
+      .innerJoin(items, eq(itemLevels.itemId, items.id))
+      .innerJoin(ssfLocations, eq(itemLevels.locationId, ssfLocations.id))
+      .where(and(
+        eq(items.tenantId, tenantId),
+        inArray(items.itemNumber, skus),
+        isNotNull(ssfLocations.externalId)
+      ));
+
+      const result: Record<string, Record<string, number>> = {};
+      for (const row of rows) {
+        if (row.itemNumber && row.locationExternalId) {
+          if (!result[row.itemNumber]) result[row.itemNumber] = {};
+          result[row.itemNumber][row.locationExternalId] = Math.max(0, parseFloat(row.quantity || "0"));
+        }
+      }
+      return result;
+    } catch (error) {
+      console.error("Error fetching per-location inventory:", error);
+      return {};
+    }
+  }
+
+  /**
+   * Get all Shopify location IDs for a tenant (from ssfLocations table).
+   * Returns array of Shopify location external IDs.
+   */
+  private async getTenantShopifyLocations(tenantId: string): Promise<string[]> {
+    try {
+      const rows = await db.select({
+        externalId: ssfLocations.externalId,
+      })
+      .from(ssfLocations)
+      .where(and(
+        eq(ssfLocations.tenantId, tenantId),
+        eq(ssfLocations.isActive, true),
+        isNotNull(ssfLocations.externalId)
+      ));
+
+      return rows
+        .map(r => r.externalId)
+        .filter((id): id is string => id !== null);
+    } catch (error) {
+      console.error("Error fetching tenant Shopify locations:", error);
+      return [];
+    }
+  }
+
+  /**
+   * Activate inventory tracking at all tenant locations for a given inventory item.
+   * Uses Shopify GraphQL inventoryBulkToggleActivation mutation.
+   */
+  private async activateInventoryAtLocations(
+    inventoryItemId: number,
+    locationIds: string[]
+  ): Promise<void> {
+    if (locationIds.length === 0) return;
+
+    const mutation = `
+      mutation inventoryBulkToggleActivation(
+        $inventoryItemId: ID!,
+        $inventoryItemUpdates: [InventoryBulkToggleActivationInput!]!
+      ) {
+        inventoryBulkToggleActivation(
+          inventoryItemId: $inventoryItemId
+          inventoryItemUpdates: $inventoryItemUpdates
+        ) {
+          inventoryItem { id }
+          userErrors { field message }
+        }
+      }
+    `;
+
+    const variables = {
+      inventoryItemId: `gid://shopify/InventoryItem/${inventoryItemId}`,
+      inventoryItemUpdates: locationIds.map(locId => ({
+        locationId: `gid://shopify/Location/${locId}`,
+        activate: true,
+      })),
+    };
+
+    try {
+      const data = await this.makeGraphQLRequest<{
+        inventoryBulkToggleActivation: {
+          inventoryItem: { id: string } | null;
+          userErrors: Array<{ field: string[]; message: string }>;
+        };
+      }>(mutation, variables);
+
+      const userErrors = data.inventoryBulkToggleActivation?.userErrors;
+      if (userErrors && userErrors.length > 0) {
+        console.warn(`[Inventory] Activation warnings for item ${inventoryItemId}:`, userErrors);
+      }
+    } catch (error) {
+      console.warn(`[Inventory] Failed to activate locations for item ${inventoryItemId}:`, error);
+    }
+  }
+
+  /**
+   * Set per-location inventory quantities for an inventory item.
+   * Uses Shopify GraphQL inventorySetQuantities mutation.
+   * Matches pattern from NexusSync shopify-pusher.mjs.
+   */
+  private async setPerLocationInventory(
+    inventoryItemId: number,
+    locationQuantities: Record<string, number>
+  ): Promise<void> {
+    const quantities = Object.entries(locationQuantities).map(([locationId, qty]) => ({
+      inventoryItemId: `gid://shopify/InventoryItem/${inventoryItemId}`,
+      locationId: `gid://shopify/Location/${locationId}`,
+      quantity: Math.max(0, Math.floor(qty)),
+    }));
+
+    if (quantities.length === 0) return;
+
+    const mutation = `
+      mutation inventorySetQuantities($input: InventorySetQuantitiesInput!) {
+        inventorySetQuantities(input: $input) {
+          inventoryAdjustmentGroup { reason }
+          userErrors { field message }
+        }
+      }
+    `;
+
+    const variables = {
+      input: {
+        reason: "correction",
+        name: "on_hand",
+        ignoreCompareQuantity: true,
+        quantities,
+      },
+    };
+
+    try {
+      const data = await this.makeGraphQLRequest<{
+        inventorySetQuantities: {
+          inventoryAdjustmentGroup: { reason: string } | null;
+          userErrors: Array<{ field: string[]; message: string }>;
+        };
+      }>(mutation, variables);
+
+      const userErrors = data.inventorySetQuantities?.userErrors;
+      if (userErrors && userErrors.length > 0) {
+        const notStocked = userErrors.some(e => e.message?.includes('not stocked at the location'));
+        if (notStocked) {
+          console.warn(`[Inventory] Item ${inventoryItemId} not stocked at some locations — activation may have failed`);
+        } else {
+          console.warn(`[Inventory] Set quantities errors for item ${inventoryItemId}:`, userErrors);
+        }
+      }
+    } catch (error) {
+      console.warn(`[Inventory] Failed to set quantities for item ${inventoryItemId}:`, error);
+    }
+  }
+
+  /**
+   * After creating/updating a product, activate all tenant locations and set per-location inventory.
+   * This replaces the old approach of setting a single inventory_quantity on the REST API.
+   */
+  private async setupPerLocationInventory(
+    tenantId: string,
+    shopifyVariants: Array<{ sku: string | null; inventory_item_id?: number }>,
+    localVariants: ProductVariant[]
+  ): Promise<void> {
+    try {
+      const locationIds = await this.getTenantShopifyLocations(tenantId);
+      if (locationIds.length === 0) {
+        console.warn("[Inventory] No Shopify locations configured for tenant — skipping per-location inventory");
+        return;
+      }
+
+      const skus = localVariants.map(v => v.sku).filter(Boolean) as string[];
+      const perLocationInventory = await this.getPerLocationInventory(tenantId, skus);
+
+      for (const shopifyVariant of shopifyVariants) {
+        const inventoryItemId = shopifyVariant.inventory_item_id;
+        if (!inventoryItemId) continue;
+
+        // Activate inventory at all tenant locations
+        await this.activateInventoryAtLocations(inventoryItemId, locationIds);
+
+        // Set per-location quantities
+        const sku = shopifyVariant.sku;
+        if (sku && perLocationInventory[sku]) {
+          await this.setPerLocationInventory(inventoryItemId, perLocationInventory[sku]);
+        }
+      }
+
+      console.log(`[Inventory] Per-location inventory setup complete for ${shopifyVariants.length} variants`);
+    } catch (error) {
+      console.warn("[Inventory] Per-location inventory setup failed (non-blocking):", error);
     }
   }
 
@@ -183,13 +420,7 @@ export class ShopifyPublishService {
         }
       }
 
-      // Fetch live inventory totals from itemLevels (summed across all locations)
-      const skus = variants.map(v => v.sku).filter(Boolean) as string[];
-      const inventoryTotals = product.tenantId
-        ? await this.getInventoryTotals(product.tenantId, skus)
-        : {};
-
-      // Prepare Shopify product data
+      // Prepare Shopify product data (inventory_quantity set to 0 — per-location handled via GraphQL after create)
       const shopifyProduct: ShopifyProductInput = {
         title: product.title,
         body_html: product.description || "",
@@ -198,7 +429,7 @@ export class ShopifyPublishService {
         tags: this.mergeTags(product),
         status: publishAsActive ? "active" : "draft",
         options: this.buildOptionsFromDatabase(options),
-        variants: this.buildVariantsFromDatabase(variants, options, inventoryTotals),
+        variants: this.buildVariantsFromDatabase(variants, options),
         images: this.buildImages(product),
         metafields: this.buildMetafields(product),
       };
@@ -221,6 +452,11 @@ export class ShopifyPublishService {
       // Assign variant images (non-blocking)
       if (response.product.images?.length && response.product.variants?.length) {
         await this.assignVariantImages(numericId, variants, response.product.variants, response.product.images, product);
+      }
+
+      // Activate all tenant locations and set per-location inventory (non-blocking)
+      if (product.tenantId && response.product.variants?.length) {
+        await this.setupPerLocationInventory(product.tenantId, response.product.variants, variants);
       }
 
       // Sync Shopify taxonomy category if set (non-blocking)
@@ -269,13 +505,7 @@ export class ShopifyPublishService {
         throw new Error("Product has no variants. All products must have at least one variant.");
       }
 
-      // Fetch live inventory totals from itemLevels (summed across all locations)
-      const skus = variants.map(v => v.sku).filter(Boolean) as string[];
-      const inventoryTotals = product.tenantId
-        ? await this.getInventoryTotals(product.tenantId, skus)
-        : {};
-
-      // Prepare Shopify update payload
+      // Prepare Shopify update payload (inventory_quantity set to 0 — per-location handled via GraphQL)
       const shopifyProduct: ShopifyProductInput = {
         title: product.title,
         body_html: product.description || "",
@@ -284,7 +514,7 @@ export class ShopifyPublishService {
         tags: this.mergeTags(product),
         status: publishAsActive ? "active" : "draft",
         options: this.buildOptionsFromDatabase(options),
-        variants: this.buildVariantsFromDatabase(variants, options, inventoryTotals),
+        variants: this.buildVariantsFromDatabase(variants, options),
         images: this.buildImages(product),
         metafields: this.buildMetafields(product),
       };
@@ -317,6 +547,11 @@ export class ShopifyPublishService {
       // Assign variant images (re-apply after update since Shopify may reset them)
       if (response.product.images?.length && response.product.variants?.length) {
         await this.assignVariantImages(parseInt(numericId), variants, response.product.variants, response.product.images, product);
+      }
+
+      // Activate all tenant locations and set per-location inventory (non-blocking)
+      if (product.tenantId && response.product.variants?.length) {
+        await this.setupPerLocationInventory(product.tenantId, response.product.variants, variants);
       }
 
       // Sync Shopify taxonomy category if set (non-blocking)
@@ -365,20 +600,11 @@ export class ShopifyPublishService {
         ? variant.shopifyVariantId.split("/").pop()
         : variant.shopifyVariantId;
 
-      // Fetch live inventory total from itemLevels (sum of all locations)
       const [product] = await db.select().from(products).where(eq(products.id, productId)).limit(1);
-      let liveInventory = variant.inventoryQuantity || 0;
-      if (product?.tenantId && variant.sku) {
-        const totals = await this.getInventoryTotals(product.tenantId, [variant.sku]);
-        if (totals[variant.sku] !== undefined) {
-          liveInventory = totals[variant.sku];
-        }
-      }
 
-      // Prepare variant update data
+      // Prepare variant update data (no inventory_quantity — handled per-location via GraphQL)
       const variantUpdate: any = {
         price: variant.price || "0.00",
-        inventory_quantity: liveInventory,
       };
 
       // Add optional fields
@@ -400,14 +626,21 @@ export class ShopifyPublishService {
       }
 
       // Update variant in Shopify via REST API
-      await this.makeShopifyRequest<{ variant: any }>(
+      const variantResponse = await this.makeShopifyRequest<{ variant: any }>(
         "PUT",
         `/admin/api/{api_version}/variants/${numericVariantId}.json`,
         { variant: variantUpdate }
       );
 
-      // Note: Variant images must be updated separately via the product images endpoint
-      // This is a limitation of Shopify's REST API
+      // Set per-location inventory via GraphQL
+      if (product?.tenantId && variant.sku && variantResponse.variant?.inventory_item_id) {
+        const perLocationInv = await this.getPerLocationInventory(product.tenantId, [variant.sku]);
+        if (perLocationInv[variant.sku]) {
+          const locationIds = await this.getTenantShopifyLocations(product.tenantId);
+          await this.activateInventoryAtLocations(variantResponse.variant.inventory_item_id, locationIds);
+          await this.setPerLocationInventory(variantResponse.variant.inventory_item_id, perLocationInv[variant.sku]);
+        }
+      }
 
       return {
         success: true,
@@ -532,12 +765,13 @@ export class ShopifyPublishService {
     });
 
     return sortedVariants.map((variant) => {
-      // Use live location totals if available, otherwise fall back to stored value
-      const liveTotal = variant.sku ? inventoryTotals[variant.sku] : undefined;
+      // Set inventory_quantity to 0 on create — per-location quantities are set
+      // separately via GraphQL inventorySetQuantities after product creation.
+      // This prevents Shopify from dumping all stock at the default location (HQ).
       const variantData: NonNullable<ShopifyProductInput["variants"]>[0] = {
         sku: variant.sku || undefined,
         price: variant.price || "0.00",
-        inventory_quantity: liveTotal !== undefined ? liveTotal : (variant.inventoryQuantity || 0),
+        inventory_quantity: 0,
         inventory_management: "shopify",
         option1: variant.option1 || undefined,
         option2: variant.option2 || undefined,
@@ -924,28 +1158,16 @@ export class ShopifyPublishService {
 
       console.log(`[CategorySync] Sending to Shopify - productGid: ${shopifyGid}, categoryGid: ${categoryGid}`);
 
-      // Make GraphQL request
-      const graphqlUrl = `https://${this.storeUrl}/admin/api/${this.apiVersion}/graphql.json`;
-      const response = await fetch(graphqlUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Shopify-Access-Token': this.accessToken,
-        },
-        body: JSON.stringify({ query: mutation, variables }),
-      });
-
-      if (!response.ok) {
-        console.warn(`Category sync failed with HTTP ${response.status} for product ${localProductId}`);
-        return;
-      }
-
-      const result = await response.json();
-      console.log(`[CategorySync] Shopify response:`, JSON.stringify(result, null, 2));
+      const result = await this.makeGraphQLRequest<{
+        productUpdate: {
+          product: { id: string; category: { id: string } | null } | null;
+          userErrors: Array<{ field: string[]; message: string }>;
+        };
+      }>(mutation, variables);
 
       // Check for GraphQL user errors
-      if (result.data?.productUpdate?.userErrors?.length > 0) {
-        const errors = result.data.productUpdate.userErrors;
+      if (result.productUpdate?.userErrors?.length > 0) {
+        const errors = result.productUpdate.userErrors;
         console.warn(`Category sync GraphQL errors for product ${localProductId}:`, errors);
         return;
       }
