@@ -245,10 +245,28 @@ export function registerBrandEnrichmentRoutes(
         scrapedAt: new Date(),
       };
 
+      // Auto-detect websiteType if not set (so Layer 1 isn't skipped for Shopify stores)
+      let websiteType = vendor.websiteType;
+      if (!websiteType) {
+        console.log('🔍 websiteType not set — auto-detecting...');
+        sendEvent('layer-progress', layerProgress); // Show progress while detecting
+        try {
+          const { detectShopifyStore } = await import('../services/shopify-scraper.service');
+          const isShopify = await detectShopifyStore(vendor.websiteUrl);
+          websiteType = isShopify ? 'shopify' : 'custom';
+          console.log(`✅ Detected websiteType: ${websiteType}`);
+          // Persist so future requests skip detection
+          await storage.updateVendor(tenantId, vendor.id, { websiteType });
+        } catch (detectErr: any) {
+          console.error('⚠️ websiteType detection failed:', detectErr.message);
+          websiteType = 'custom'; // fallback — Layer 2 will handle it
+        }
+      }
+
       // ============================================================================
       // Layer 1: Shopify JSON API (fast, direct access)
       // ============================================================================
-      if (vendor.websiteType === 'shopify') {
+      if (websiteType === 'shopify') {
         console.log('🛍️ Layer 1: Attempting Shopify JSON API...');
         layerProgress.layer1.attempted = true;
         sendEvent('layer-progress', layerProgress);
@@ -351,15 +369,43 @@ export function registerBrandEnrichmentRoutes(
               console.log('❌ Layer 1: No products found');
               sendEvent('layer-progress', layerProgress);
             } else if (matches.length === 1) {
-              // Single match - proceed as normal
-              console.log('✅ Layer 1: Single product match found');
-              const shopifyData = await scrapeShopifyProduct(vendor.websiteUrl, {
-                styleNumber,
-                productName,
-                color
-              });
+              // Single match - use the product data we already have (avoid redundant re-search)
+              console.log(`✅ Layer 1: Single product match found: "${matches[0].product.title}"`);
+              const singleMatch = matches[0];
+              const { parseProductDescription, extractCleanDescription } = await import('../services/html-parser.service');
+              const { normalizeUrl } = await import('../services/shopify-scraper.service');
 
-            if (shopifyData.scrapingSuccess) {
+              const parsedData = parseProductDescription(singleMatch.product.body_html || '');
+              const cleanDescription = extractCleanDescription(singleMatch.product.body_html || '');
+
+              const shopifyData = {
+                styleNumber,
+                productName: singleMatch.product.title,
+                color,
+                brandProductUrl: `${normalizeUrl(vendor.websiteUrl)}/products/${singleMatch.product.handle}`,
+                brandProductTitle: singleMatch.product.title,
+                brandDescription: cleanDescription,
+                materialComposition: parsedData.materialComposition,
+                careInstructions: parsedData.careInstructions,
+                features: parsedData.features || [],
+                images: singleMatch.product.images.map((img: any, index: number) => ({
+                  url: img.src,
+                  width: img.width || 0,
+                  height: img.height || 0,
+                  alt: img.alt || singleMatch.product.title,
+                  isPrimary: index === 0,
+                })),
+                variants: singleMatch.product.variants.map((v: any) => ({
+                  sku: v.sku,
+                  size: v.title,
+                  price: v.price,
+                  available: v.available,
+                })),
+                scrapedAt: new Date(),
+                scrapingSuccess: true,
+                scrapingError: undefined,
+              };
+
               console.log('✅ Layer 1: Shopify JSON API succeeded');
               enrichedData = { ...enrichedData, ...shopifyData };
               layerProgress.layer1.success = true;
@@ -373,16 +419,10 @@ export function registerBrandEnrichmentRoutes(
               });
               sendEvent('complete', { cached: false, data: enrichedData });
 
-              // Use setImmediate to ensure the complete event is sent before ending the connection
               setImmediate(() => {
                 res.end();
               });
-              return; // Stop execution after scheduling the end
-            } else {
-              console.log('❌ Layer 1: Shopify JSON API failed');
-              sendEvent('layer-progress', layerProgress);
-              // Fall through to Layer 2
-            }
+              return;
           } else {
             // Multiple matches found - send to frontend for user selection
             console.log(`🔀 Layer 1: Found ${matches.length} product matches - requesting user selection`);
