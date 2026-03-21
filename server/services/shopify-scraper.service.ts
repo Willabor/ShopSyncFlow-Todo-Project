@@ -218,6 +218,57 @@ async function searchShopifyProducts(
     console.log(`  ℹ️ Collection search failed:`, error.message);
   }
 
+  // Strategy 3: HTML search page scraping (works even when JSON APIs are blocked)
+  try {
+    const searchPageUrl = `${baseUrl}/search?q=${encodeURIComponent(query)}&type=product`;
+    console.log(`  🔍 Trying HTML search page: "${query}"`);
+
+    const response = await politeFetcher.fetch(searchPageUrl, {
+      headers: {
+        'Accept': 'text/html,application/xhtml+xml',
+      }
+    });
+
+    if (response.ok) {
+      const html = await response.text();
+      const $ = cheerio.load(html);
+
+      // Extract product handles from search results (links to /products/...)
+      const handles = new Set<string>();
+      $('a[href*="/products/"]').each((_, el) => {
+        const href = $(el).attr('href') || '';
+        const match = href.match(/\/products\/([a-z0-9\-]+)/i);
+        if (match && match[1] && !['', 'undefined'].includes(match[1])) {
+          handles.add(match[1]);
+        }
+      });
+
+      if (handles.size > 0) {
+        console.log(`  ✅ HTML search found ${handles.size} product handle(s)`);
+        for (const handle of Array.from(handles).slice(0, 10)) {
+          try {
+            const productData = await fetchShopifyProductByHandle(baseUrl, handle);
+            if (productData) {
+              products.push(productData);
+            }
+          } catch (e: any) {
+            console.warn(`  ⚠️ Failed to fetch product "${handle}":`, e.message);
+          }
+        }
+
+        if (products.length > 0) {
+          return products;
+        }
+      } else {
+        console.log(`  ℹ️ HTML search returned no product links`);
+      }
+    } else {
+      console.log(`  ℹ️ HTML search page not available (${response.status})`);
+    }
+  } catch (error: any) {
+    console.log(`  ℹ️ HTML search page failed:`, error.message);
+  }
+
   return products;
 }
 
@@ -350,6 +401,32 @@ export async function findShopifyProductMultiMatch(
     if (products.length === 0 && searchCriteria.styleNumber && searchCriteria.productName) {
       console.log('🔍 Style number search returned nothing, trying product name...');
       products = await searchShopifyProducts(websiteUrl, searchCriteria.productName);
+    }
+  }
+
+  // Try direct handle fetch before expensive full product fetch
+  if (products.length === 0 && searchCriteria.styleNumber) {
+    console.log('🔍 Trying direct product handle fetch...');
+    const baseUrl = normalizeUrl(websiteUrl);
+    // Try common handle patterns: style number as-is, lowercased, with hyphens
+    const styleLower = searchCriteria.styleNumber.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const handleGuesses = [styleLower];
+    // If product name exists, try "product-name-style" pattern
+    if (searchCriteria.productName) {
+      const nameLower = searchCriteria.productName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      handleGuesses.push(nameLower, `${nameLower}-${styleLower}`);
+    }
+    for (const handle of handleGuesses) {
+      try {
+        const productData = await fetchShopifyProductByHandle(baseUrl, handle);
+        if (productData) {
+          console.log(`  ✅ Direct handle fetch found: "${productData.title}" via handle "${handle}"`);
+          products.push(productData);
+          break;
+        }
+      } catch (e: any) {
+        // continue to next guess
+      }
     }
   }
 
