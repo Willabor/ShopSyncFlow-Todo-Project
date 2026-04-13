@@ -1920,7 +1920,13 @@ function AIGeneratorPanel({
     },
     onSuccess: (result) => {
       const { description, provider } = result;
-      setGeneratedDescription(description);
+      // Strip markdown code fences that AI may include (```html ... ```)
+      const cleanDesc = description
+        ?.replace(/^\s*```html\s*/im, '')
+        .replace(/^\s*```\s*/m, '')
+        .replace(/\s*```\s*$/gm, '')
+        .trim() || '';
+      setGeneratedDescription(cleanDesc);
       const providerLabel = provider === 'claude' ? '🟣 Claude' : '🔵 Gemini';
       toast({
         title: `Description Generated via ${providerLabel}`,

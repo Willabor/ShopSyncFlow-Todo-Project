@@ -368,3 +368,49 @@ npm run test:e2e:docker
 1. Check `shopifySyncLog` table for errors
 2. Review `shopifySyncErrors` for detailed diagnostics
 3. Use `/api/shopify/sync/debug` endpoint
+
+---
+
+## Obsidian Knowledge Base (Talia Vault)
+
+All project knowledge, research, and infrastructure docs live in an Obsidian vault synced via Dropbox.
+
+- **Vault name**: `talia`
+- **Vault path**: `C:\Users\DELL\Dropbox\Talia`
+- **MCP**: `obsidian-mcp` is configured — use Obsidian MCP tools to read/write notes
+
+### Vault Structure
+| Note | Purpose |
+|------|---------|
+| `Compass.md` | Master index — links to all other notes |
+| `ShopSyncFlow.md` | Project overview, current dev work |
+| `Infrastructure.md` | Docker, database, architecture |
+| `NAS.md` | Synology NAS setup, SSH, deploy commands |
+| `Research Library.md` | Index for all deep research entries |
+| `Secrets Reference.md` | Points to `.secrets.env` file location |
+
+### Rules
+1. **All research and deep-dive findings must be saved to the Obsidian vault** under Research Library, linked back to the Compass.
+2. **NAS credentials and SSH setup** are documented in the NAS note and `.secrets.env` — check Obsidian first for NAS connection details.
+3. **New research notes** should be created in the vault and linked from Research Library.
+4. **Secrets** are stored in `C:\Users\DELL\Dropbox\Talia\.secrets.env` — never in git.
+
+## NAS Deployment (Remote)
+
+Passwordless SSH is configured to the Synology NAS:
+
+```bash
+# Deploy (from this machine)
+ssh nexus-nas "cd /volume1/docker/ShopSyncFlow-Todo-Project && git pull origin develop && /usr/local/bin/docker compose up --build -d"
+
+# View logs
+ssh nexus-nas "docker logs shopsyncflow-app -f --tail 100"
+
+# Check status
+ssh nexus-nas "docker ps | grep shopsyncflow"
+```
+
+- **SSH alias**: `nexus-nas` (in `~/.ssh/config`)
+- **User**: NexusAdmin
+- **Key**: `~/.ssh/nexus-nas-key`
+- **Host**: 100.124.10.65 (Tailscale)

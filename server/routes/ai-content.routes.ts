@@ -151,7 +151,10 @@ Requirements:
 
 Write the description now:`;
 
-  return await callOpenRouter(prompt, 2000);
+  let description = await callOpenRouter(prompt, 2000);
+  // Strip markdown code fences if present (```html ... ``` or ```...```)
+  description = description.replace(/^\s*```html\s*/im, '').replace(/^\s*```\s*/m, '').replace(/\s*```\s*$/gm, '').trim();
+  return description;
 }
 
 /**
