@@ -794,7 +794,7 @@ Return ONLY the HTML description. No markdown, no title, no explanations. Pure H
     console.log('🔍 DESCRIPTION BEFORE PROCESSING:', description.substring(0, 200));
 
     // Remove markdown code fences if present (```html ... ``` or ```...```)
-    description = description.replace(/^```html\s*/i, '').replace(/^```\s*/, '').replace(/\s*```$/g, '');
+    description = description.replace(/^\s*```html\s*/im, '').replace(/^\s*```\s*/m, '').replace(/\s*```\s*$/gm, '').trim();
 
     // 🔧 BACKEND FIX: Limit transition words to 2-3 per description (not 0)
     // List of transition words that AI forces at sentence beginnings
@@ -1417,7 +1417,7 @@ If you cannot extract a specific field, set it to null or empty array. The rawAn
     console.log('🔍 RAW VISION API RESPONSE:', analysisText.substring(0, 300));
 
     // Remove markdown code fences if present
-    analysisText = analysisText.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/\s*```$/g, '');
+    analysisText = analysisText.replace(/^\s*```json\s*/im, '').replace(/^\s*```\s*/m, '').replace(/\s*```\s*$/gm, '').trim();
 
     // Parse JSON response
     let analysisData;
@@ -1756,7 +1756,7 @@ Return ONLY the JSON object. No additional text.`;
     console.log(`   AI response received: ${text.length} characters`);
 
     // Remove markdown code fences (common in AI responses)
-    text = text.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/\s*```$/g, '');
+    text = text.replace(/^\s*```json\s*/im, '').replace(/^\s*```\s*/m, '').replace(/\s*```\s*$/gm, '').trim();
 
     // Parse JSON response
     let parsed: any;
@@ -2112,7 +2112,7 @@ Return ONLY in the specified format. No markdown code fences, no explanations, n
     const metaDescription = metaDescMatch ? metaDescMatch[1].trim() : '';
 
     // Clean up description - remove markdown code fences if present
-    description = description.replace(/^```html\s*/i, '').replace(/^```\s*/, '').replace(/\s*```$/g, '');
+    description = description.replace(/^\s*```html\s*/im, '').replace(/^\s*```\s*/m, '').replace(/\s*```\s*$/gm, '').trim();
 
     if (!description) {
       throw new Error('Failed to parse collection description from AI response.');
