@@ -1920,11 +1920,10 @@ function AIGeneratorPanel({
     },
     onSuccess: (result) => {
       const { description, provider } = result;
-      // Strip markdown code fences that AI may include (```html ... ```)
+      // Strip ALL markdown code fences that AI may include (```html, ```, etc.)
       const cleanDesc = description
-        ?.replace(/^\s*```html\s*/im, '')
-        .replace(/^\s*```\s*/m, '')
-        .replace(/\s*```\s*$/gm, '')
+        ?.replace(/^\s*```\w*\s*\n?/i, '')
+        .replace(/\n?\s*```\s*$/g, '')
         .trim() || '';
       setGeneratedDescription(cleanDesc);
       const providerLabel = provider === 'claude' ? '🟣 Claude' : '🔵 Gemini';

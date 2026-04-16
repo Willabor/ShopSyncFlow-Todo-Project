@@ -539,10 +539,11 @@ CRITICAL APPAREL DESCRIPTION RULES YOU MUST FOLLOW:
    - Transition words (however, therefore, additionally)
 6. **Customer-Focused**: Use "you" language, NOT "this product" or "our product"
 7. **Structure** (Benefits-First Approach):
-   - Opening hook (product name in first 5 words, create interest)
-   - Benefits paragraph (emotional appeal, aspirations, why they need this)
-   - Key Features list (Feature + Benefit format: "What it is: Why it matters")
-   - Size & Fit list (fit type, material, care instructions)
+   - Product Description paragraphs (opening hook, benefits, features & quality)
+   - Product Features list (Feature + Benefit format: "What it is: Why it matters")
+   - Size & Fit list (fit type, sizing guide, available sizes)
+   - Material list (fabric, care instructions, style number, color, fit type)
+   - About the Brand paragraph (2-3 sentences about the brand)
    - Closing CTA (call-to-action with urgency)
 
 APPAREL-SPECIFIC REQUIREMENTS:
@@ -624,7 +625,7 @@ Example: "You'll turn heads with the relaxed baggy fit. The durable fabric withs
 
 Example: "The nylon ripstop fabric provides exceptional durability. Elastic waistband ensures a comfortable, adjustable fit all day."</p>
 
-<h2>Key Features</h2>
+<h2>Product Features</h2>
 <ul>
   <li><strong>[Feature 1]:</strong> [Clear benefit explanation - 10-15 words. Use descriptive language]</li>
   <li><strong>[Feature 2]:</strong> [How it improves your experience - 10-15 words. Use descriptive adjectives]</li>
@@ -638,23 +639,19 @@ ${params.sizeData ? `<h2>Size &amp; Fit</h2>
   <li><strong>Fit Style:</strong> [Direct fit description - 10-15 words. ${params.sizeData?.fitGuidance ? `Use this guidance: "${params.sizeData.fitGuidance}"` : 'Start with fit type, NOT transition word. Example: "Features a relaxed baggy fit for comfortable streetwear style."'}]</li>
   <li><strong>Sizing Guide:</strong> [Size tips - 10-15 words. ${params.sizeData?.fitGuidance ? `Incorporate fit guidance provided above.` : 'Example: "True to size, select your regular size for best fit."'}]</li>
 ${params.sizeData?.sizesAvailable ? `  <li><strong>Available Sizes:</strong> ${params.sizeData.sizesAvailable.join(', ')}</li>` : ''}
-  <li><strong>Material:</strong> [Material composition - 10-15 words. ${params.enrichedData?.materialComposition ? `Use: "${params.enrichedData.materialComposition}"` : 'Example: "Made from 100% polyester for durability and comfort."'}]</li>
-  <li><strong>Care Instructions:</strong> [Care info - 10-15 words. ${params.enrichedData?.careInstructions ? `Use: "${params.enrichedData.careInstructions}"` : 'Example: "Machine wash cold, tumble dry low for easy care."'}]</li>
 </ul>` : ''}
 
-<h2>Product Details</h2>
+<h2>Material</h2>
 <ul>
-${params.styleNumber ? `  <li><strong>Style Number:</strong> ${params.styleNumber}</li>` : '  <li><strong>Style Number:</strong> [Style number if provided]</li>'}
-${params.color ? `  <li><strong>Color:</strong> ${params.color}</li>` : '  <li><strong>Color:</strong> [Color name]</li>'}
-${params.material ? `  <li><strong>Material:</strong> ${params.material}</li>` : '  <li><strong>Material:</strong> [Material composition]</li>'}
-${params.careInstructions ? `  <li><strong>Care Instructions:</strong> ${params.careInstructions}</li>` : '  <li><strong>Care Instructions:</strong> [Care instructions]</li>'}
-${params.fitType ? `  <li><strong>Fit Type:</strong> ${params.fitType}</li>` : '  <li><strong>Fit Type:</strong> [Fit description]</li>'}
+  <li><strong>Fabric:</strong> [Material composition - 10-15 words. ${params.enrichedData?.materialComposition ? `Use: "${params.enrichedData.materialComposition}"` : params.material ? `Use: "${params.material}"` : 'Example: "Made from 100% polyester for durability and comfort."'}]</li>
+  <li><strong>Care Instructions:</strong> [Care info - 10-15 words. ${params.enrichedData?.careInstructions ? `Use: "${params.enrichedData.careInstructions}"` : params.careInstructions ? `Use: "${params.careInstructions}"` : 'Example: "Machine wash cold, tumble dry low for easy care."'}]</li>
+${params.styleNumber ? `  <li><strong>Style Number:</strong> ${params.styleNumber}</li>` : ''}
+${params.color ? `  <li><strong>Color:</strong> ${params.color}</li>` : ''}
+${params.fitType ? `  <li><strong>Fit Type:</strong> ${params.fitType}</li>` : ''}
 </ul>
 
-${params.brandData && (params.brandData.description || params.brandData.specialty) ? `
-<h2>About ${params.brandData.name}</h2>
-<p>[Write 2-3 sentences about the brand. ${params.brandData.description ? `Use this brand description: "${params.brandData.description}"` : ''} ${params.brandData.specialty ? `Mention their specialty: ${params.brandData.specialty}.` : ''} ${params.brandData.foundedYear ? `Founded in ${params.brandData.foundedYear}.` : ''} ${params.brandData.targetAudience ? `Designed for ${params.brandData.targetAudience}.` : ''} Keep it concise and relevant to the product. MAX 50 words.]</p>
-` : ''}
+<h2>About the Brand</h2>
+${params.brandData && (params.brandData.description || params.brandData.specialty) ? `<p>[Write 2-3 sentences about the brand "${params.brandData.name}". ${params.brandData.description ? `Use this brand description: "${params.brandData.description}"` : ''} ${params.brandData.specialty ? `Mention their specialty: ${params.brandData.specialty}.` : ''} ${params.brandData.foundedYear ? `Founded in ${params.brandData.foundedYear}.` : ''} ${params.brandData.targetAudience ? `Designed for ${params.brandData.targetAudience}.` : ''} Keep it concise and relevant to the product. MAX 50 words.]</p>` : `<p>[Write 2-3 sentences about the brand "${params.brand || 'this brand'}". Describe what they are known for in the fashion/apparel industry. Keep it concise and relevant to the product. MAX 50 words.]</p>`}
 
 <p>[Closing - 2 SHORT sentences. Summarize main benefit. Use <strong> tags around product name if mentioned. NO transition words (no "Finally," "In conclusion," "Overall"). MAX 25 words total]
 
@@ -667,22 +664,22 @@ Example: "Upgrade your streetwear collection today. Get yours now and experience
 HTML FORMATTING RULES:
 - ❌ DO NOT include <h1> tag (Shopify already generates this from Product Title)
 - ✅ START with <p> tag for opening paragraph
-- ✅ USE <h2> for section headings (Key Features, Size & Fit, Product Details, About [Brand])
+- ✅ USE <h2> for section headings (Product Features, Size &amp; Fit, Material, About the Brand)
 - ✅ USE <ul> and <li> for bullet lists (CRITICAL - Yoast checks for lists!)
 - ✅ USE <strong> for feature names (Feature:) and label names (Style Number:, Color:)
 - ✅ USE <em> for emphasis if needed
 - ✅ ESCAPE special characters: Use &amp; for &, &quot; for ", &lt; for <, &gt; for >
 - ✅ CLOSE all tags properly (<p>...</p>, <h2>...</h2>, <ul>...</ul>)
 - ✅ NEST tags properly (ul > li, not backwards)
-- ✅ ALWAYS include Product Details section with style number (critical for SEO)
-- ✅ About the Brand section is OPTIONAL (only if brand data provided)
+- ✅ ALWAYS include Material section with fabric composition (critical for SEO)
+- ✅ ALWAYS include About the Brand section
 
 **List Requirements** (CRITICAL - Yoast checks for bullet/numbered lists):
 - MUST include at least 3 <ul> lists in the HTML
 - Each list MUST have at least 4-5 <li> items
 - Lists MUST be properly formatted: <ul><li>text</li><li>text</li></ul>
 - NO extra spacing or line breaks inside <ul> tags
-- Example: <h2>Key Features</h2><ul><li><strong>Feature:</strong> Description</li></ul>
+- Example: <h2>Product Features</h2><ul><li><strong>Feature:</strong> Description</li></ul>
 
 YOAST SEO REQUIREMENTS (CRITICAL - MUST MEET ALL):
 
@@ -793,8 +790,8 @@ Return ONLY the HTML description. No markdown, no title, no explanations. Pure H
 
     console.log('🔍 DESCRIPTION BEFORE PROCESSING:', description.substring(0, 200));
 
-    // Remove markdown code fences if present (```html ... ``` or ```...```)
-    description = description.replace(/^\s*```html\s*/im, '').replace(/^\s*```\s*/m, '').replace(/\s*```\s*$/gm, '').trim();
+    // Remove ALL markdown code fences (```html, ```HTML, ```, etc.) — aggressive strip
+    description = description.replace(/^\s*```\w*\s*\n?/i, '').replace(/\n?\s*```\s*$/g, '').trim();
 
     // 🔧 BACKEND FIX: Limit transition words to 2-3 per description (not 0)
     // List of transition words that AI forces at sentence beginnings

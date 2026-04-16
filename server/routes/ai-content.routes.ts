@@ -140,20 +140,26 @@ Tone: ${params.tone || 'professional'}
 Sizes Available: ${params.sizesAvailable || 'Not specified'}
 
 Requirements:
-1. Write 250-300 words in HTML format (use <p>, <ul>, <li> tags)
+1. Write 250-300 words in HTML format (use <p>, <h2>, <ul>, <li> tags)
 2. Start with product title "${params.selectedTitle || params.productName || params.title}" in the first 5 words
 3. Use a ${params.tone || 'professional'} tone
-4. Include a compelling opening hook
-5. Highlight key features and benefits
-6. End with a clear call-to-action
-7. Do NOT use markdown - only HTML tags
-8. Do NOT include <h1> or heading tags
+4. Structure with these EXACT sections using <h2> headings:
+   - Opening paragraphs (product description - hook, benefits, quality)
+   - <h2>Product Features</h2> (5 bullet points with <strong>Feature:</strong> Benefit format)
+   - <h2>Size &amp; Fit</h2> (fit style, sizing guide, available sizes)
+   - <h2>Material</h2> (fabric composition, care instructions, color, style number)
+   - <h2>About the Brand</h2> (2-3 sentences about the brand)
+   - Closing CTA paragraph
+5. End with a clear call-to-action
+6. Do NOT use markdown - only HTML tags
+7. Do NOT include <h1> tags (Shopify generates h1 from product title)
+8. Return ONLY the HTML. No markdown code fences.
 
 Write the description now:`;
 
   let description = await callOpenRouter(prompt, 2000);
-  // Strip markdown code fences if present (```html ... ``` or ```...```)
-  description = description.replace(/^\s*```html\s*/im, '').replace(/^\s*```\s*/m, '').replace(/\s*```\s*$/gm, '').trim();
+  // Remove ALL markdown code fences (```html, ```HTML, ```, etc.) — aggressive strip
+  description = description.replace(/^\s*```\w*\s*\n?/i, '').replace(/\n?\s*```\s*$/g, '').trim();
   return description;
 }
 
