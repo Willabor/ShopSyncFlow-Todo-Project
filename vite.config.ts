@@ -1,4 +1,3 @@
-/// <reference types="vitest" />
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
@@ -28,12 +27,5 @@ export default defineConfig({
       usePolling: true,
       interval: 1000,
     },
-  },
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./client/src/test/setup.ts'],
-    include: ['**/*.test.{ts,tsx}'],
-    exclude: ['node_modules', 'dist', 'e2e'],
   },
 });

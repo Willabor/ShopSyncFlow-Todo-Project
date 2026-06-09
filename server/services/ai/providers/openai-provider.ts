@@ -388,10 +388,11 @@ export class OpenRouterProvider extends OpenAIProvider {
   override readonly displayName = 'OpenRouter' as any;
 
   constructor(config?: AIProviderConfig) {
+    // apiKey may be absent when config is omitted; parent handles env fallback
     super({
       ...config,
       baseUrl: config?.baseUrl || 'https://openrouter.ai/api/v1',
-    });
+    } as AIProviderConfig);
     this.models = OPENROUTER_MODELS;
   }
 

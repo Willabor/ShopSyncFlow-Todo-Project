@@ -30,6 +30,7 @@ export interface SyncProgress {
       synced: number;
       created: number;
       updated: number;
+      deleted: number;
     };
     fileSizes: {
       status: 'pending' | 'in_progress' | 'completed' | 'failed';
@@ -102,6 +103,7 @@ export class SyncProgressTracker {
           synced: 0,
           created: 0,
           updated: 0,
+          deleted: 0,
         },
         fileSizes: {
           status: 'pending',

@@ -2722,6 +2722,8 @@ export const insertProductSchema = createInsertSchema(products).omit({
       "Handle cannot start or end with a hyphen"
     )
     .optional(),
+  // jsonb $type<string[]> infers a malformed array type through drizzle-zod; pin it explicitly
+  bulletPoints: z.array(z.string()).nullish(),
 });
 
 export const insertProductOptionSchema = createInsertSchema(productOptions, {

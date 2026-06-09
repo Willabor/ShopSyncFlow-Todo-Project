@@ -143,6 +143,9 @@ async function recommendCategoryWithAI(
     return createFallbackRecommendation(hierarchicalType, databaseMatches);
   }
 
+  // Declared outside try so the OpenRouter fallback in catch can reuse it
+  let prompt = '';
+
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
@@ -153,7 +156,7 @@ async function recommendCategoryWithAI(
         ).join('\n')}`
       : '\n\nNo database matches found. Suggest the best general category.';
 
-    const prompt = `You are a product categorization expert. Given a hierarchical product type, recommend the BEST Google Product Category.
+    prompt = `You are a product categorization expert. Given a hierarchical product type, recommend the BEST Google Product Category.
 
 Hierarchical Product Type: "${hierarchicalType}"
 ${matchesContext}

@@ -336,6 +336,9 @@ export function registerQbImportRoutes(
   // Trigger manual QB inventory sync (nexus_db → shopsyncflow_db)
   app.post("/api/qb-inventory/sync", requireAuth, requireRole(["SuperAdmin", "WarehouseManager"]), async (req: Request, res: Response) => {
     const tenantId = getTenantId(req);
+    if (!tenantId) {
+      return res.status(401).json({ message: "No tenant context" });
+    }
     try {
       const result = await syncTenant(tenantId, { batchSize: 1000 });
       res.json({
@@ -357,6 +360,9 @@ export function registerQbImportRoutes(
   // Get QB inventory sync status (last sync info)
   app.get("/api/qb-inventory/sync-status", requireAuth, async (req: Request, res: Response) => {
     const tenantId = getTenantId(req);
+    if (!tenantId) {
+      return res.status(401).json({ message: "No tenant context" });
+    }
     try {
       const status = await getSyncStatus(tenantId);
       res.json(status);
@@ -748,20 +754,19 @@ export function registerQbImportRoutes(
           title: [option1, option2].filter(Boolean).join(' / ') || 'Default',
           sku: qbItem.itemNumber || undefined,
           barcode: qbItem.upc || undefined,
-          price: qbItem.retailPrice?.toString() || undefined,
+          price: qbItem.retailPrice?.toString() || '0.00',
           compareAtPrice: qbItem.msrp?.toString() || undefined,
           cost: qbItem.costPrice?.toString() || undefined,
           inventoryQuantity: totalQty,
           option1,
           option2,
           option3: null,
-          weight: qbItem.weight ? parseFloat(qbItem.weight.toString()) : undefined,
+          weight: qbItem.weight ? String(parseFloat(qbItem.weight.toString())) : undefined,
           weightUnit: 'lb',
           requiresShipping: true,
           taxable: true,
           inventoryPolicy: 'deny',
           fulfillmentService: 'manual',
-          inventoryManagement: 'shopify',
         });
         createdVariants.push(variant);
       }

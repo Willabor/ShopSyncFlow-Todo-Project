@@ -13,14 +13,14 @@ async function throwIfResNotOk(res: Response) {
     let errorMessage = text;
     try {
       const errorData = JSON.parse(text);
-      if (errorData.message) {
-        errorMessage = errorData.message;
-      }
+      // Parsed as JSON: use its message, or a readable fallback if empty —
+      // never show the raw JSON body to the user
+      errorMessage = errorData.message || `Request failed (${res.status} ${res.statusText})`.trim();
     } catch {
       // If not JSON, use the raw text
     }
 
-    throw new Error(errorMessage || res.statusText);
+    throw new Error(errorMessage || `Request failed (${res.status})`);
   }
 }
 

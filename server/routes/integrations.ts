@@ -590,7 +590,7 @@ router.get('/claude/status', requireAuth, async (req: Request, res: Response) =>
       connected: integration.isActive,
       hasApiKey: true,
       lastTestedAt: integration.lastUsedAt,
-      model: integration.config?.model || 'claude-3-haiku-20240307'
+      model: (integration.config as { model?: string } | null)?.model || 'claude-3-haiku-20240307'
     });
   } catch (error: any) {
     console.error('❌ [Claude] Error fetching status:', error);
