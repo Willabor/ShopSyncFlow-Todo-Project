@@ -6,6 +6,7 @@
  */
 
 import { safeErrorMessage } from "../utils/safe-error";
+import { isFullUrlHandle, shouldRunShopifyLayer } from "../utils/enrichment-routing";
 import type { Express, Request, Response } from "express";
 import { storage } from "../storage";
 import { createHash } from "crypto";
@@ -270,8 +271,7 @@ export function registerBrandEnrichmentRoutes(
       // slug. Skip Layer 1 in that case so it falls through to Layer 2's URL-based scraping
       // (see "For Layer 2, productHandle contains the full URL" below) instead of failing the
       // exact slug match with "Product with handle ... not found".
-      const isFullUrlHandle = !!productHandle && productHandle.startsWith('http');
-      if (websiteType === 'shopify' && !isFullUrlHandle) {
+      if (shouldRunShopifyLayer(websiteType, productHandle)) {
         console.log('🛍️ Layer 1: Attempting Shopify JSON API...');
         layerProgress.layer1.attempted = true;
         sendEvent('layer-progress', layerProgress);
@@ -473,7 +473,7 @@ export function registerBrandEnrichmentRoutes(
 
         // Check if user already selected a specific product URL
         // For Layer 2, productHandle contains the full URL (not a Shopify handle)
-        if (productHandle && productHandle.startsWith('http')) {
+        if (isFullUrlHandle(productHandle)) {
           console.log(`✅ Layer 2: Using pre-selected product URL: ${productHandle}`);
           const genericData = await scrapeGenericProductByUrl(productHandle, {
             styleNumber,
