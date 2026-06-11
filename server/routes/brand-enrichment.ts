@@ -266,7 +266,12 @@ export function registerBrandEnrichmentRoutes(
       // ============================================================================
       // Layer 1: Shopify JSON API (fast, direct access)
       // ============================================================================
-      if (websiteType === 'shopify') {
+      // A full-URL productHandle is a Layer 2 (generic scraper) selection, not a Shopify
+      // slug. Skip Layer 1 in that case so it falls through to Layer 2's URL-based scraping
+      // (see "For Layer 2, productHandle contains the full URL" below) instead of failing the
+      // exact slug match with "Product with handle ... not found".
+      const isFullUrlHandle = !!productHandle && productHandle.startsWith('http');
+      if (websiteType === 'shopify' && !isFullUrlHandle) {
         console.log('🛍️ Layer 1: Attempting Shopify JSON API...');
         layerProgress.layer1.attempted = true;
         sendEvent('layer-progress', layerProgress);
