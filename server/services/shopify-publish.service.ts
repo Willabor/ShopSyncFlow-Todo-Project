@@ -1036,6 +1036,17 @@ export class ShopifyPublishService {
   private buildMetafields(product: Product): ShopifyProductInput["metafields"] {
     const metafields: ShopifyProductInput["metafields"] = [];
 
+    // Listing ownership marker (amendment #2 of the auto-listing plan):
+    // ShopSyncFlow and the Monalisa agent coexist on the same store; each
+    // product has exactly ONE listing-content owner, declared as data.
+    // Monalisa's update path is fail-closed on this value.
+    metafields.push({
+      namespace: "custom",
+      key: "listing_owner",
+      value: "shopsyncflow",
+      type: "single_line_text_field",
+    });
+
     // Style number (custom metafield)
     if (product.styleNumber) {
       metafields.push({
