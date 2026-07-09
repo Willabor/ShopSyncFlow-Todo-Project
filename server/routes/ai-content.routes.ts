@@ -12,11 +12,13 @@ import * as bulletPointGenerator from "../services/bullet-point-generator.servic
  * Uses OpenAI-compatible API via OpenRouter with Kimi K2.5 model
  */
 /**
- * Default model: google/gemini-2.0-flash-001 (fast, non-thinking).
+ * Default model: google/gemini-2.5-flash (fast, non-thinking).
+ * NOTE: the old slug google/gemini-2.0-flash-001 was removed from OpenRouter
+ * (returns 404 "No endpoints found"), which broke the fallback entirely.
  * Avoid "thinking" models (kimi-k2.5, deepseek-r1) - they consume all tokens
  * on internal reasoning and return empty content.
  */
-const OPENROUTER_DEFAULT_MODEL = 'google/gemini-2.0-flash-001';
+const OPENROUTER_DEFAULT_MODEL = 'google/gemini-2.5-flash';
 const OPENROUTER_TIMEOUT_MS = 30000; // 30-second timeout
 
 async function callOpenRouter(prompt: string, maxTokens: number = 2000, modelOverride?: string): Promise<string> {

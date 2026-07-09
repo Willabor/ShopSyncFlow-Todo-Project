@@ -17,11 +17,13 @@ export function isGeminiQuotaError(error: any): boolean {
 
 /**
  * Default model for OpenRouter text fallback.
- * Using google/gemini-2.0-flash-001 - fast, reliable, non-thinking model.
+ * Using google/gemini-2.5-flash - fast, reliable, non-thinking model.
+ * (The old slug google/gemini-2.0-flash-001 was removed from OpenRouter and
+ * returned 404, silently breaking every fallback that used this util.)
  * Avoid "thinking" models (kimi-k2.5, deepseek-r1) as they consume tokens
  * on internal reasoning and often return empty content.
  */
-const DEFAULT_TEXT_MODEL = 'google/gemini-2.0-flash-001';
+const DEFAULT_TEXT_MODEL = 'google/gemini-2.5-flash';
 const OPENROUTER_TIMEOUT_MS = 30000; // 30-second timeout
 
 /**
@@ -87,7 +89,7 @@ export async function callOpenRouterVision(
   }
 
   // Use a vision-capable model via OpenRouter
-  const model = 'google/gemini-2.0-flash-001';
+  const model = 'google/gemini-2.5-flash';
 
   const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
