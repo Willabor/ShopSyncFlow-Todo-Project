@@ -258,7 +258,7 @@ Product Information:
 - Category: ${params.category}
 - Brand: ${params.brand || 'Not specified'}
 - Price: $${params.price || 'Not specified'}
-- Key Features: ${params.keyFeatures.join(', ')}
+- Key Features: ${params.keyFeatures?.join(', ') || 'Not specified'}
 ${params.vendorDescription ? `- **Vendor Description** (use for context): ${params.vendorDescription}` : ''}
 - Target Keyword: ${keyword}
 - **GENDER (MANDATORY): ${genderFormatted}** ← YOU MUST USE THIS EXACT GENDER IN ALL TITLES
@@ -463,7 +463,7 @@ Product Information:
 - Category: ${params.category}
 - Brand: ${params.brand || 'Not specified'}
 - Price: $${params.price || 'Not specified'}
-- Key Features (from CSV): ${params.keyFeatures.join(', ')}
+- Key Features (from CSV): ${params.keyFeatures?.join(', ') || 'Not specified'}
 ${params.vendorDescription ? `- **Vendor Description** (from CSV file - use for context and supplementary details):\n  ${params.vendorDescription}` : ''}
 - Target Keyword: ${keyword}
 - Tone: ${toneDescriptions[tone]}
@@ -1065,7 +1065,7 @@ ${params.selectedTitle ? `- **Selected SEO Title** (use this as PRIMARY referenc
 - Category: ${params.category}
 - Brand: ${params.brand || 'Not specified'}
 - Price: $${params.price || 'Not specified'}
-- Key Features: ${params.keyFeatures.join(', ')}
+- Key Features: ${params.keyFeatures?.join(', ') || 'Not specified'}
 ${params.vendorDescription ? `- **Vendor Description**: ${params.vendorDescription.substring(0, 200)}...` : ''}
 - Target Keyword: ${keyword}
 - Gender: ${genderFormatted}
